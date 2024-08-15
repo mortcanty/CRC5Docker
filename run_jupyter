@@ -1,0 +1,4 @@
+#!/bin/bash
+source ~/venvcrc5/bin/activate
+cd src
+jupyter lab --no-browser --ip=0.0.0.0 --allow-root --NotebookApp.token=''
