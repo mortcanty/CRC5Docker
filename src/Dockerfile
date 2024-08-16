@@ -47,9 +47,11 @@ COPY    setup.py /home/setup.py
 #RUN     python3 setup.py install
 RUN     pip3 install -e .
 
+RUN     mkdir /home/imagery
+
 # textbook scripts, notebooks and images
 ADD     scripts /home/scripts
-ADD     imagery /home/imagery
+#ADD     imagery /home/imagery
 ADD     pngs /home/pngs
 COPY    Chapter?.ipynb /home/
 

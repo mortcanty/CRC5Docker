@@ -6,7 +6,7 @@ included in the Docker container mort/crc5docker.
 
 Pull and/or run the container for the first time with
 
-    sudo docker run -d -p 8888:8888 -p 8888:8888 -v <my_image_folder>:/home/imagery/ --name=crc5 mort/crc5docker
+    sudo docker run -d -p 8888:8888 -v <my_image_folder>:/home/imagery/ --name=crc5 mort/crc5docker
 
 This maps the host directory <my_image_folder> to the container directory /home/imagery/ and runs the
 container in detached mode. 
