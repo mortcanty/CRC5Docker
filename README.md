@@ -1,9 +1,19 @@
 CRC5Docker
 ==========
 
-Python scripts and Jupyter Notebooks for the textbook 
-"Image Analysis, Classification and Change Detection in Remote Sensing, Fifth Revised Edition"
-included in the Docker container mort/crc5docker.
+Python scripts and Jupyter Notebooks for the textbook
+__Image Analysis, Classification and Change Detection in Remote Sensing, Fifth Revised Edition__
+included in the Docker image
+
+    mort/crc5docker.
+
+The scripts are documented in 
+
+    /python_scripts.pdf   
+
+and the book chapters are summarized in
+ 
+    /chapter_abstracts.pdf
 
 Pull and/or run the container for the first time with
 
@@ -24,6 +34,5 @@ Re-start with
 
     docker start crc5     
     
-The scripts are documented in 
 
-    /out/python_scripts.pdf   
+    

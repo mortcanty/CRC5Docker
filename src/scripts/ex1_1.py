@@ -17,8 +17,7 @@ def disp(infile, n):
     image = np.zeros((bands, rows, cols))
     for b in range(bands):
         band = inDataset.GetRasterBand(b+1)
-        image[b, :, :] = (
-            band.ReadAsArray(0, 0, cols, rows))
+        image[b,:,:] = band.ReadAsArray(0,0,cols,rows)
     inDataset = None
     band = image[n-1, :, :]
     mn = np.amin(band)
