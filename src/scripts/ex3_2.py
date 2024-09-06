@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #Name:  ex3_2.py
 import numpy as np
 from osgeo import gdal

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #Name:  ex5_2.py
 import sys, getopt
 import numpy as np

@@ -6,18 +6,23 @@ FROM     debian:bullseye
 
 LABEL  "maintainer"="mort.canty@gmail.com"
 
-ENV     REFRESHED_AT=2024-06-26
+ENV     REFRESHED_AT=2024-09-05
 
+# last 3 installs are required for opencv
 RUN apt-get update && apt-get install -y \
     python3  \
     build-essential  \
     pandoc  \
     gdal-bin  \
     python3-gdal  \
-    python3-pip
+    python3-pip \
+    ffmpeg \
+    libsm6 \
+    libxext6
 
 # jupyter notebook and assorted packages
 RUN     pip3 install --upgrade pip && \
+        pip3 install numpy && \
         pip3 install jupyter && \
         pip3 install ipyleaflet && \
         pip3 install scikit-learn && \
@@ -47,11 +52,11 @@ COPY    setup.py /home/setup.py
 #RUN     python3 setup.py install
 RUN     pip3 install -e .
 
+# imagery directory to be linked with local
 RUN     mkdir /home/imagery
 
 # textbook scripts, notebooks and images
 ADD     scripts /home/scripts
-#ADD     imagery /home/imagery
 ADD     pngs /home/pngs
 COPY    Chapter?.ipynb /home/
 

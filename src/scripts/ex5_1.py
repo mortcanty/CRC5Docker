@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-#Name:  ex5_1.py
+#!/usr/bin/env python3
+#  Name:     ex5_1.py
 import numpy as np
 import os, sys, getopt
 from osgeo import gdal
