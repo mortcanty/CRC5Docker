@@ -22,7 +22,7 @@ Pull and/or run the container for the first time with
 This maps the host directory _crc5imagery_ to the container directory /home/imagery/ and runs the
 container in detached mode. The compressed  _crc5imagery_ directory can be downloaded from
 
-... (TBA)
+https://drive.google.com/file/d/1Ca-rs1Om2bnF79YGWnqijW7PRsZ4vKG5/view?usp=sharing
 
 Point your browser to http://localhost:8888 to see the JupyterLab home page and open a Chapter notebook.
 
