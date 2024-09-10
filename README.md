@@ -9,11 +9,7 @@ included in the Docker image
 
 The scripts are documented in 
 
-    /python_scripts.pdf   
-
-and the book chapters are summarized in
- 
-    /chapter_abstracts.pdf
+    /python_scripts.pdf
 
 Pull and/or run the container for the first time with
 
