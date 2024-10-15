@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #******************************************************************************
 #  Name:     krx.py
 #  Purpose:  Kernel RX anomaly detection for multi- and hyperspectral images
@@ -27,57 +27,51 @@ Options:
   -h         this help
    
   -s  <int>   sample size for kernel matrix (default 1000)
-  
-  -n  <int>   nscale parameter for Gauss kernel (default 10)
 
 -------------------------------------------------'''%sys.argv[0]      
     
-    
-    
-    
+
+
     options,args = getopt.getopt(sys.argv[1:],'hs:n:')
     m = 1000
-    nscale = 10
     for option, value in options: 
         if option == '-h':
             print(usage)
             return    
         elif option == '-s':
             m = eval(value)
-        elif option == '-n':
-            nscale = eval(value)     
     gdal.AllRegister()
     infile = args[0] 
     path = os.path.dirname(infile)
     basename = os.path.basename(infile)
     root, ext = os.path.splitext(basename)
     outfile = path+'/'+root+'_krx'+ext        
-#  input image                   
+    #  input image
     inDataset = gdal.Open(infile,GA_ReadOnly)
     cols = inDataset.RasterXSize
     rows = inDataset.RasterYSize 
     bands = inDataset.RasterCount
     projection = inDataset.GetProjection()
     geotransform = inDataset.GetGeoTransform()  
-#  image data matrix    
+    #  image data matrix
     GG = np.zeros((rows*cols,bands))                               
     for b in range(bands):
         band = inDataset.GetRasterBand(b+1)
         GG[:,b] = band.ReadAsArray(0,0,cols,rows)\
                               .astype(float).ravel()          
     inDataset = None
-#  random training data matrix
+    #  random training data matrix
     idx = np.random.randint(0,rows*cols,size=m)
     G = GG[idx,:]
-#  KRX-algorithm        
+    #  KRX-algorithm
     print('------------ KRX ---------------')
     print(time.asctime())
     print('Input %s'%infile)
     start = time.time()  
-    K,gma=auxil.kernelMatrix(G,n=nscale,k=1)
+    K,gma=auxil.kernelMatrix(G, k=1)
     Kc = auxil.center(K)
     print('GMA: %f'%gma)
-#  pseudoinvert centered kernel matrix     
+    #  pseudoinvert centered kernel matrix
     lam, alpha = np.linalg.eigh(Kc)
     idx = range(m)[::-1]
     lam = lam[idx]
@@ -87,7 +81,7 @@ Options:
     alpha = alpha[:,:r]
     lam = lam[:r]
     Kci = alpha*np.diag(1./lam)*alpha.T
-#  row-by-row anomaly image    
+    #  row-by-row anomaly image
     res = np.zeros((rows,cols))
     Ku = np.sum(K,0)/m - np.sum(K)/m**2
     Ku = np.mat(np.ones(cols)).T*Ku
@@ -102,7 +96,7 @@ Options:
         Kgu = Kg - Ku
         d = np.sum(np.multiply(Kgu,Kgu*Kci),1) 
         res[i,:] = d.ravel()  
-#  output 
+    #  output
     driver = gdal.GetDriverByName('GTiff')    
     outDataset = driver.Create(outfile,cols,rows,1,\
                                     GDT_Float32) 

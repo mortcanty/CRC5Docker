@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #******************************************************************************
 #  Name:     supervisedclass.py
 #  Purpose:  object classes for supervised image classification, maximum likelihood,
@@ -131,20 +131,20 @@ class Gausskernel(object):
 class Ffn(object):
     '''Base Class for Neural Net Classifiers'''
     def __init__(self,Gs,ls,Ls,epochs,validate):
-#      setup the network architecture
+    #   setup the network architecture
         self._L = Ls[0]
         self._m,self._N = Gs.shape
         self._K = ls.shape[1]
         self._epochs = epochs
-#      biased input as column vectors
+    #   biased input as column vectors
         Gs = np.mat(Gs).T
         self._Gs = np.vstack((np.ones(self._m),Gs))
-#      biased output vector from hidden layer
+    #   biased output vector from hidden layer
         self._n = np.mat(np.zeros(self._L+1))
-#      labels as column vectors
+    #   labels as column vectors
         self._ls = np.mat(ls).T
         if validate:
-#          split into train and validate sets
+    #       split into train and validate sets
             self._m = self._m//2
             self._Gsv = self._Gs[:,self._m:]
             self._Gs = self._Gs[:,:self._m]
@@ -153,18 +153,18 @@ class Ffn(object):
         else:
             self._Gsv = self._Gs
             self._lsv = self._ls
-#      weight matrices
+    #   weight matrices
         self._Wh=np.mat(np.random. \
                       random((self._N+1,self._L)))-0.5
         self._Wo=np.mat(np.random. \
                       random((self._L+1,self._K)))-0.5
 
     def forwardpass(self,G):
-#      forward pass through the network
+    #   forward pass through the network
         expnt = self._Wh.T*G
         self._n = np.vstack((np.ones(1),1.0/ \
                                   (1+np.exp(-expnt))))
-#      softmax activation
+    #   softmax activation
         I = self._Wo.T*self._n
         A = np.exp(I-max(I))
         return A/np.sum(A)
@@ -239,24 +239,24 @@ class Ffnbp(Ffn):
         itr = 0
         try:
             while itr<maxitr:
-#              select train example pair at random
+                # select train example pair at random
                 nu = np.random.randint(0,self._m)
                 x = self._Gs[:,nu]
                 ell = self._ls[:,nu]
-#              send it through the network
+                # send it through the network
                 m = self.forwardpass(x)
-#              determine the deltas
+                # determine the deltas
                 d_o = ell - m
                 d_h = np.multiply(np.multiply(self._n,\
                      (1-self._n)),(self._Wo*d_o))[1::]
-#              update synaptic weights
+                # update synaptic weights
                 inc_o = eta*(self._n*d_o.T)
                 inc_h = eta*(x*d_h.T)
                 self._Wo += inc_o + alpha*inc_o1
                 self._Wh += inc_h + alpha*inc_h1
                 inc_o1 = inc_o
                 inc_h1 = inc_h
-#              record cost function
+                # record cost function
                 if itr % self._m == 0:
                     cost.append(self.cost())
                     costv.append(self.costv())
@@ -273,7 +273,7 @@ class Ffncg(Ffn):
         Ffn.__init__(self,Gs,ls,Ls,epochs,validate)
 
     def gradient(self):
-#      gradient of cross entropy wrt synaptic weights
+    #   gradient of cross entropy wrt synaptic weights
         M,n = self.vforwardpass(self._Gs)
         D_o = self._ls - M
         D_h = np.mat(n.A*(1-n.A)*(self._Wo*D_o).A)[1::,:]
@@ -282,7 +282,7 @@ class Ffncg(Ffn):
         return np.append(dEh.A,dEo.A)
 
     def hessian(self):
-#      Hessian of cross entropy wrt synaptic weights
+    #   Hessian of cross entropy wrt synaptic weights
         nw = self._L*(self._N+1)+self._K*(self._L+1)
         v = np.eye(nw,dtype=np.float)
         H = np.zeros((nw,nw))
@@ -291,18 +291,18 @@ class Ffncg(Ffn):
         return H
 
     def rop(self,V):
-#      reshape V to dimensions of Wh and Wo, transpose
+    #   reshape V to dimensions of Wh and Wo, transpose
         VhT = np.reshape(V[:(self._N+1)*self._L],
                          (self._N+1,self._L)).T
         Vo = np.mat(np.reshape(V[self._L*(self._N+1)::],
                          (self._L+1,self._K)))
         VoT = Vo.T
-#      transpose the output weights
+    #   transpose the output weights
         Wo = self._Wo
         WoT = Wo.T
-#      forward pass
+    #   forward pass
         M,n = self.vforwardpass(self._Gs)
-#      evaluation of v^T.H
+    #   evaluation of v^T.H
         Z = np.zeros(self._m)
         D_o = self._ls - M                 #d^o
         RIh = VhT*self._Gs                 #Rv{I^h}
@@ -383,7 +383,7 @@ class Ffnekf(Ffn):
     '''Extended Kalman Filter Neural Net Classifier'''
     def __init__(self,Gs,ls,Ls,epochs=10,validate=False):
         Ffn.__init__(self,Gs,ls,Ls,epochs,validate)
-        # weight covariance matrices
+    #   weight covariance matrices
         self._Sh = np.zeros((self._N+1,self._N+1,self._L))
         for i in range(self._L):
             self._Sh[:,:,i] = np.identity(self._N+1)*100
@@ -556,7 +556,7 @@ class RF(object):
         return len(misscls) / float(m)
 
 if __name__ == '__main__':
-#  test on random data
+#   test on random data
     Gs = 2*np.random.random((1000,3)) -1.0
     ls = np.zeros((1000,4))
     for l in ls:

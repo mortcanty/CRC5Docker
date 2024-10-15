@@ -11,24 +11,24 @@ def pca(infile, outfile):
     cols = inDataset.RasterXSize
     rows = inDataset.RasterYSize    
     bands = inDataset.RasterCount
-#  data matrix
+    #  data matrix
     G = np.zeros((rows*cols,bands))
     k = 0                                   
     for b in range(bands):
         band = inDataset.GetRasterBand(b+1)
         tmp = band.ReadAsArray(0,0,cols,rows).ravel()
         G[:, b] = tmp - np.mean(tmp)
-#  covariance matrix
+    #  covariance matrix
     C = np.mat(G).T*np.mat(G)/(cols*rows-1)   
-#  diagonalize    
+    #  diagonalize
     lams,U = np.linalg.eigh(C)  
-#  sort
+    #  sort
     idx = np.argsort(lams)[::-1]
     lams = lams[idx]
     U = U[:, idx]
-#  project
+    #  project
     PCs = np.reshape(np.array(G*U),(rows,cols,bands))   
-#  write to disk       
+    #  write to disk
     if outfile:
         driver = gdal.GetDriverByName('Gtiff')   
         outDataset = driver.Create(outfile,

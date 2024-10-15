@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #******************************************************************************
 #  Name:     sar_seqQ.py
 #  Purpose:  Perform sequential change detection on multi-temporal, polarimetric SAR imagery 
@@ -14,7 +14,7 @@
 #
 # MIT License
 # 
-# Copyright (c) 2018 Mort Canty
+# Copyright (c) 2024 Mort Canty
 
 def call_register(arg3):
     from auxil.registersar import register
@@ -323,7 +323,7 @@ Usage:
 
 Sequential change detection for polarimetric SAR images
 
-python %s [OPTIONS]  infiles* outfile enl
+python %s [OPTIONS]  infiles* outfile_stub enl
 
 Options:
   
@@ -474,7 +474,7 @@ files written:
     print( '\nelapsed time for p-value calculation: '+str(time.time()-start1) )    
     
     cmap,smap,fmap,bmap = change_maps(pvarray,significance)   
-#  post process bmap for Loewner direction   
+#  post process bmap for Loewner direction  and atsf
     avimg = getimg(fns[0])
     avimglog = cmap*0+k
     r = 1.0 

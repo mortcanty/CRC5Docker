@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #******************************************************************************
 #  Name:     rx.py
 #  Purpose:  RX anomaly detection for multi- and hyperspectral images
@@ -44,7 +44,7 @@ Options:
     print(time.asctime())
     print('Input %s'%infile)
     start = time.time()        
-#  input image, convert to ENVI format                     
+    #  input image, convert to ENVI format
     inDataset = gdal.Open(infile,GA_ReadOnly)
     cols = inDataset.RasterXSize
     rows = inDataset.RasterYSize          
@@ -55,12 +55,12 @@ Options:
                                           inDataset)
     inDataset = None
     enviDataset = None  
-#  RX-algorithm        
+    #  RX-algorithm
     img = envi.open('imagery/entmp.hdr')
     arr = img.load()
     rx = RX(background=calc_stats(arr))
     res = rx(arr)
-#  output 
+    #  output
     driver = gdal.GetDriverByName('GTiff')    
     outDataset = driver.Create(outfile,cols,rows,1,\
                                     GDT_Float32) 

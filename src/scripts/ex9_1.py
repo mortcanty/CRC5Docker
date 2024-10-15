@@ -10,7 +10,7 @@ import auxil.auxil1 as auxil
 import  em
     
 def main(): 
-#  read in bands 4
+    #  read in bands 4
     infile1 = sys.argv[1]
     infile2 = sys.argv[2] 
     inDataset = gdal.Open(infile1,GA_ReadOnly)     
@@ -21,11 +21,11 @@ def main():
     inDataset = gdal.Open(infile2,GA_ReadOnly)       
     band = inDataset.GetRasterBand(4)  
     G2 = band.ReadAsArray(0,0,cols,rows).flatten()
-#  centered data matrix    
+    #  centered data matrix
     G = np.zeros((rows*cols,2))
     G[:,0] = G1-np.mean(G1)
     G[:,1] = G2-np.mean(G2)
-#  initial PCA
+    #  initial PCA
     cpm = auxil.Cpm(2) 
     cpm.update(G)  
     eivs,w = np.linalg.eigh(cpm.covariance())
@@ -34,12 +34,12 @@ def main():
     pcs = G*w       
     plt.plot([-1,1],[-np.abs(w[0,1]/w[0,0]),
                      np.abs(w[0,1]/w[0,0])])
-#  iterated PCA    
+    #  iterated PCA
     itr = 0
     while itr<5:
         sigma = np.sqrt(eivs[1])
         U = np.random.rand(2,rows*cols)
-#      cluster the second PC
+    #   cluster the second PC
         unfrozen=np.where(np.abs(pcs[:,1]) >= sigma)[0]
         frozen=np.where( np.abs(pcs[:,1]) < sigma)[0]
         U[0,frozen] = 1.0
@@ -47,15 +47,15 @@ def main():
         for j in range(2):
             U[j,:]=U[j,:]/np.sum(U,0)
         U=em.em(G,U,0,0,rows,cols,unfrozen=unfrozen)[0]   
-#      re-sample the weighted covariance matrix 
+    #   re-sample the weighted covariance matrix
         cpm.update(G,U[0,:])
         cov = cpm.covariance()
         eivs,w = np.linalg.eigh(cov)
         eivs = eivs[::-1]
         w = w[:,::-1]    
-#      weighted PCs                
+    #   weighted PCs
         pcs = G*w 
-#      plot the first principal axis   
+    #   plot the first principal axis
         plt.plot([-1,1],[-np.abs(w[0,1]/w[0,0]),
                 np.abs(w[0,1]/w[0,0])],dashes=[4,4])
         itr += 1

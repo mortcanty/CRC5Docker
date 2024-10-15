@@ -5,7 +5,7 @@ Python scripts and Jupyter Notebooks for the textbook
 __Image Analysis, Classification and Change Detection in Remote Sensing, Fifth Revised Edition__
 included in the Docker image
 
-    mort/crc5docker.
+    mort/crc5docker
 
 The scripts are documented in 
 
@@ -72,7 +72,7 @@ Chapter 4 is intended  to consolidate and extend material presented in the prece
 foundation for the rest of the book. In Sections 4.1 and 4.2, building on the discrete Fourier transform introduced in 
 Chapter 3, the concept of discrete convolution  is introduced and filtering, both in the spatial and in the frequency domain, 
 is discussed. Frequent reference to filtering will be made in Chapter 5 when  enhancement and geometric and radiometric 
-correction of visual/infrared and SAR imagery are treated and in the discussion of convolutional neural networks in Chapter 6. 
+correction of visual/infrared and SAR imagery are treated and in the discussion of convolutional neural networks in Chapter 7. 
 In Section 4.3 it is shown that the discrete wavelet transform of Chapter 3 is equivalent to a
 recursive application of low- and high-pass filters (a filter bank) and a pyramid algorithm for multi-scale image 
 representation is described and programmed in Python. Wavelet pyramid representations are applied in Chapter 5 for

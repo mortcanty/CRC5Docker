@@ -215,7 +215,7 @@ Modified from Imreg.py, see http://www.lfd.uci.edu/~gohlke/:
                 radii = shape[1]
         theta = np.empty((angles, radii), dtype=np.float64)
         theta.T[:] = -np.linspace(0, np.pi, angles, endpoint=False)
-#      d = radii
+    #   d = radii
         d = np.hypot(shape[0]-center[0], shape[1]-center[1])
         log_base = 10.0 ** (math.log10(d) / (radii))
         radius = np.empty_like(theta)
@@ -228,9 +228,9 @@ Modified from Imreg.py, see http://www.lfd.uci.edu/~gohlke/:
         return output, log_base
 
     lines0,samples0 = bn0.shape
-#  make reference and warp bands same shape
+    #  make reference and warp bands same shape
     bn1 = bn1[0:lines0,0:samples0]
-#  get scale, angle
+    #  get scale, angle
     f0 = fftshift(abs(fft2(bn0)))
     f1 = fftshift(abs(fft2(bn1)))
     h = highpass(f0.shape)
@@ -257,7 +257,7 @@ Modified from Imreg.py, see http://www.lfd.uci.edu/~gohlke/:
         angle += 180.0
     elif angle > 90.0:
         angle -= 180.0
-#  re-scale and rotate and then get shift
+    #  re-scale and rotate and then get shift
     bn2 = ndii.zoom(bn1, 1.0/scale)
     bn2 = ndii.rotate(bn2, angle)
     if bn2.shape < bn0.shape:
@@ -274,7 +274,7 @@ Modified from Imreg.py, see http://www.lfd.uci.edu/~gohlke/:
         t0 -= f0.shape[0]
     if t1 > f0.shape[1] // 2:
         t1 -= f0.shape[1]
-#  return result
+    #  return result
     return (scale,angle,[t0,t1])
 
 # ---------------------------
@@ -285,12 +285,12 @@ class DWTArray(object):
     '''Partial DWT representation of image band
        which is input as 2-D uint8 array'''
     def __init__(self,band,samples,lines,itr=0):
-# Daubechies D4 wavelet
+    # Daubechies D4 wavelet
         self.H = np.asarray([(1-math.sqrt(3))/8,(3-math.sqrt(3))/8,(3+math.sqrt(3))/8,(1+math.sqrt(3))/8])
         self.G = np.asarray([-(1+math.sqrt(3))/8,(3+math.sqrt(3))/8,-(3-math.sqrt(3))/8,(1-math.sqrt(3))/8])
         self.num_iter = itr
         self.max_iter = 3
-# ignore edges if band dimension is not divisible by 2^max_iter
+    # ignore edges if band dimension is not divisible by 2^max_iter
         r = 2**self.max_iter
         self.samples = r*(samples//r)
         self.lines = r*(lines//r)
@@ -335,7 +335,7 @@ class DWTArray(object):
         return 1
 
     def normalize(self,a,b):
-#      normalize wavelet coefficients at all levels
+    #   normalize wavelet coefficients at all levels
         for c in range(1,self.num_iter+1):
             m = self.lines//(2**c)
             n = self.samples//(2**c)
@@ -344,21 +344,21 @@ class DWTArray(object):
             self.data[m:2*m,n:2*n] = a[2]*self.data[m:2*n,n:2*n]+b[2]
 
     def filter(self):
-#      single application of filter bank
+    #   single application of filter bank
         if self.num_iter == self.max_iter:
             return 0
-#      get upper left quadrant
+    #   get upper left quadrant
         m = self.lines//2**self.num_iter
         n = self.samples//2**self.num_iter
         f0 = self.data[:m, :n]
-#      temporary arrays
+    #   temporary arrays
         f1 = np.zeros((m//2, n))
         g1 = np.zeros((m//2, n))
         ff1 = np.zeros((m//2, n//2))
         fg1 = np.zeros((m//2, n//2))
         gf1 = np.zeros((m//2, n//2))
         gg1 = np.zeros((m//2, n//2))
-#      filter columns and downsample
+    #   filter columns and downsample
         ds = np.asarray(range(m//2))*2+1
         for i in range(n):
             temp = np.convolve(f0[:, i].ravel(),\
@@ -367,7 +367,7 @@ class DWTArray(object):
             temp = np.convolve(f0[:, i].ravel(),\
                                        self.G, 'same')
             g1[:, i] = temp[ds]
-#      filter rows and downsample
+    #   filter rows and downsample
         ds = np.asarray(range(n//2))*2+1
         for i in range(m//2):
             temp=np.convolve(f1[i, :], self.H, 'same')
@@ -390,7 +390,7 @@ class DWTArray(object):
         G = self.G[::-1]
         m = self.lines//2**(self.num_iter-1)
         n = self.samples//2**(self.num_iter-1)
-#      get upper left quadrant
+    #   get upper left quadrant
         f0 = self.data[:m,:n]
         ff1 = f0[:m//2,:n//2]
         fg1 = f0[:m//2,n//2:]
@@ -398,7 +398,7 @@ class DWTArray(object):
         gg1 = f0[m//2:,n//2:]
         f1 = np.zeros((m//2,n))
         g1 = np.zeros((m//2,n))
-#      upsample and filter rows
+    #   upsample and filter rows
         for i in range(m//2):
             a = np.ravel(np.transpose(np.vstack((ff1[i,:],np.zeros(n//2)))))
             b = np.ravel(np.transpose(np.vstack((fg1[i,:],np.zeros(n//2)))))
@@ -406,7 +406,7 @@ class DWTArray(object):
             a = np.ravel(np.transpose(np.vstack((gf1[i,:],np.zeros(n//2)))))
             b = np.ravel(np.transpose(np.vstack((gg1[i,:],np.zeros(n//2)))))
             g1[i,:] = np.convolve(a,H,'same') + np.convolve(b,G,'same')
-#      upsample and filter columns
+    #   upsample and filter columns
         for i in range(n):
             a = np.ravel(np.transpose(np.vstack((f1[:,i],np.zeros(m//2)))))
             b = np.ravel(np.transpose(np.vstack((g1[:,i],np.zeros(m//2)))))
@@ -418,9 +418,9 @@ class ATWTArray(object):
     '''A trous wavelet transform'''
     def __init__(self,band):
         self.num_iter = 0
-#      cubic spline filter
+    #   cubic spline filter
         self.H = np.array([1.0/16,1.0/4,3.0/8,1.0/4,1.0/16])
-#      data arrays
+    #   data arrays
         self.lines,self.samples = band.shape
         self.bands = np.zeros((4,self.lines,self.samples),np.float32)
         self.bands[0,:,:] = np.asarray(band,np.float32)
@@ -441,20 +441,20 @@ class ATWTArray(object):
     def filter(self):
         if self.num_iter < 3:
             self.num_iter += 1
-#          a trous filter
+    #       a trous filter
             n = 2**(self.num_iter-1)
             H = np.vstack((self.H,np.zeros((2**(n-1),5))))
             H = np.transpose(H).ravel()
             H = H[0:-n]
-#          temporary arrays
+    #       temporary arrays
             f1 = np.zeros((self.lines,self.samples))
             ff1 = f1*0.0
-#          filter columns
+    #       filter columns
             f0 = self.bands[0,:,:]
-#          filter columns
+    #       filter columns
             for i in range(self.samples):
                 f1[:,i] = np.convolve(f0[:,i].ravel(), H, 'same')
-#          filter rows
+    #       filter rows
             for j in range(self.lines):
                 ff1[j,:] = np.convolve(f1[j,:], H, 'same')
             self.bands[self.num_iter,:,:] = self.bands[0,:,:] - ff1
@@ -469,19 +469,19 @@ class ATWTArray(object):
 # contrast enhancement
 # -------------------
 def linstr(x):
-# linear stretch
+    # linear stretch
     return bytestr(x)
 
 def histeqstr(x):
     x = bytestr(x)
-#  histogram equalization stretch
+    #  histogram equalization stretch
     hist,bin_edges = np.histogram(x,256,(0,256))
     cdf = hist.cumsum()
     lut = 255*cdf/float(cdf[-1])
     return np.interp(x,bin_edges[:-1],lut)
 
 def lin2pcstr(x):
-#  2% linear stretch
+    #  2% linear stretch
     x = bytestr(x)
     hist,bin_edges = np.histogram(x,256,(0,256))
     cdf = hist.cumsum()
@@ -501,7 +501,7 @@ def lin2pcstr(x):
     return np.interp(x,bin_edges,fp)
 
 def bytestr(arr,rng=None):
-#  byte stretch image numpy array
+    #  byte stretch image numpy array
     shp = arr.shape
     arr = arr.ravel()
     if rng is None:

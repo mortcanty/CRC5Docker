@@ -236,7 +236,8 @@ An ENL image will be written to the same directory with '_enl' appended.
     ya,xa = np.histogram(enl_ml,bins=500)
     ya[0] = 0
     if graphics:
-        plt.plot(xa[0:-1],ya)
+        fig, ax = plt.subplots()
+        ax.bar(xa[0:-1],ya)
         plt.title('Histogram ENL for %s'%infile)
         plt.show()
     print ('ENL image written to: %s'%outfile)

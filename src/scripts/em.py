@@ -32,16 +32,16 @@ def em(G,U,T0,beta,rows,cols,unfrozen=None):
     while ((dU > 0.001) or (itr < 10)) and (itr < 500):
         Uold = U+0.0
         ms = np.sum(U,axis=1)
-#      prior probabilities
+        # prior probabilities
         Ps = np.asarray(ms/m).ravel()
-#      cluster means
+        # cluster means
         Ms = np.asarray((np.mat(U)*np.mat(G)).T)
-#      loop over the cluster index
+        # loop over the cluster index
         for k in range(K):
             Ms[:,k] = Ms[:,k]/ms[k]
             W = np.tile(Ms[:,k].ravel(),(m,1))
             Ds = G - W
-#          covariance matrix
+            # covariance matrix
             for i in range(N):
                 W[:,i] = np.sqrt(U[k,:]) \
                     .ravel()*Ds[:,i].ravel()
@@ -51,21 +51,21 @@ def em(G,U,T0,beta,rows,cols,unfrozen=None):
             Cinv = np.linalg.inv(C)
             qf = np.asarray(np.sum(np.multiply(Ds \
                         ,np.mat(Ds)*Cinv),1)).ravel()
-#          class hypervolume and partition density
+            # class hypervolume and partition density
             fhv[k] = sqrtdetC
             idx = np.where(qf < 1.0)
             pdens[k] = np.sum(U[k,idx])/fhv[k]
-#          new memberships
+            # new memberships
             U[k,unfrozen] = np.exp(-qf[unfrozen]/2.0)\
                    *(Ps[k]/sqrtdetC)
-#          random membership for annealing
+            # random membership for annealing
             if T > 0.0:
                 Ur = 1.0 - np.random\
                      .random(len(unfrozen))**(1.0/T)
                 U[k,unfrozen] = U[k,unfrozen]*Ur
-#      spatial membership
+        # spatial membership
         if beta > 0:
-#          normalize class probabilities
+            # normalize class probabilities
             a = np.sum(U,axis=0)
             idx = np.where(a == 0)[0]
             a[idx] = 1.0
@@ -75,16 +75,16 @@ def em(G,U,T0,beta,rows,cols,unfrozen=None):
                 U_N = 1.0 - nd.convolve(
                     np.reshape(U[k,:],(rows,cols)),Nb)
                 V[k,:] = np.exp(-beta*U_N).ravel()
-#          combine spectral/spatial
+            # combine spectral/spatial
             U[:,unfrozen] = U[:,unfrozen]*V[:,unfrozen]
-#      normalize all
+        # normalize all
         a = np.sum(U,axis=0)
         idx = np.where(a == 0)[0]
         a[idx] = 1.0
         for k in range(K):
             U[k,:] = U[k,:]/a
         T = 0.8*T
-#      log likelihood
+        # log likelihood
         Uflat = U.ravel()
         Uoldflat = Uold.ravel()
         idx = np.where(U.flat)[0]
@@ -197,7 +197,7 @@ and the class probabilities output file is named
     print ('scale:    %i'%max_scale)
 
     start = time.time()
-#  read in image and compress
+    #  read in image and compress
     path = os.path.dirname(infile)
     basename = os.path.basename(infile)
     root, ext = os.path.splitext(basename)
@@ -210,25 +210,25 @@ and the class probabilities output file is named
         DWTbands.append(DWTband)
     rows,cols = DWTbands[0].get_quadrant(0).shape
     G = np.transpose(np.array([DWTbands[i].get_quadrant(0,float=True).ravel() for i in range(bands)]))
-#  initialize membership matrix
+    #  initialize membership matrix
     n = G.shape[0]
     U = np.random.random((K,n))
     den = np.sum(U,axis=0)
     for j in range(K):
         U[j,:] = U[j,:]/den
-#  cluster at minimum scale
+    #  cluster at minimum scale
     try:
         U,Ms,Cs,Ps,pdens = em(G,U,T0,beta,rows,cols)
     except:
         print('em failed')
         return
-#  sort clusters wrt partition density
+    #  sort clusters wrt partition density
     idx = np.argsort(pdens)
     idx = idx[::-1]
     U = U[idx,:]
-#  clustering at increasing scales
+    #  clustering at increasing scales
     for i in range(max_scale-min_scale):
-#      expand U and renormalize
+        # expand U and renormalize
         U = np.reshape(U,(K,rows,cols))
         rows = rows*2
         cols = cols*2
@@ -239,14 +239,14 @@ and the class probabilities output file is named
         den = np.sum(U,axis=0)
         for j in range(K):
             U[j,:] = U[j,:]/den
-#      expand the image
+        # expand the image
         for i in range(bands):
             DWTbands[i].invert()
         G = [DWTbands[i].get_quadrant(
               0,float=True).ravel()
                  for i in range(bands)]
         G = np.transpose(np.array(G))
-#      cluster
+        # cluster
         unfrozen = np.where(np.max(U,axis=0) < 0.90)
         try:
             U,Ms,Cs,Ps,pdens=em(G,U,0.0,beta,rows,cols,
@@ -260,7 +260,7 @@ and the class probabilities output file is named
     for k in range(K):
         print ('cluster: %i'%k)
         print (Cs[k])
-#  up-sample class memberships if necessary
+    #  up-sample class memberships if necessary
     if min_scale>0:
         U = np.reshape(U,(K,rows,cols))
         f = 2**min_scale
@@ -273,11 +273,11 @@ and the class probabilities output file is named
         den = np.sum(U,axis=0)
         for j in range(K):
             U[j,:] = U[j,:]/den
-#  classify
+    #  classify
     labels = np.byte(np.argmax(U,axis=0)+1)
     class_image[0:rows,0:cols] = np.reshape(labels,(rows,cols))
     rows1,cols1 = class_image.shape
-#  write to disk
+    #  write to disk
     driver = inDataset.GetDriver()
     outDataset = driver.Create(outfile,cols1,rows1,1,GDT_Byte)
     projection = inDataset.GetProjection()
@@ -293,7 +293,7 @@ and the class probabilities output file is named
     outBand.WriteArray(class_image,0,0)
     outBand.FlushCache()
     outDataset = None
-#  write class membership probability file if desired
+    #  write class membership probability file if desired
     if probs:
         outDataset = driver.Create(probfile,cols,rows,K,GDT_Byte)
         if geotransform is not None:

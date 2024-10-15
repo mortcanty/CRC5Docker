@@ -11,13 +11,13 @@ def noisecovar(infile):
     cols = inDataset.RasterXSize
     rows = inDataset.RasterYSize
     bands = inDataset.RasterCount
-#  data matrix for difference images
+    #  data matrix for difference images
     D = np.zeros((cols*rows,bands))
     for b in range(bands):
         band = inDataset.GetRasterBand(b+1)
         tmp = band.ReadAsArray(0,0,cols,rows)
         D[:,b] = (tmp-np.roll(tmp,1,axis=0)).ravel()      
-#  noise covariance matrix
+    #  noise covariance matrix
     return np.mat(D).T*np.mat(D)/(2*(rows*cols-1))
 
 if __name__ == '__main__':

@@ -14,7 +14,7 @@ def main():
         bands = inDataset.RasterCount
     else:
         return
-#  transposed data matrix
+    #  transposed data matrix
     m = rows*cols
     G = np.zeros((bands,m))
     for b in range(bands):
@@ -23,20 +23,20 @@ def main():
                               .astype(float).ravel()
         G[b,:] = tmp - np.mean(tmp)
     G = np.mat(G)
-#  covariance matrix
+    #  covariance matrix
     S = G*G.T/(m-1)   
-#  diagonalize and sort eigenvectors
+    #  diagonalize and sort eigenvectors
     lamda,W = np.linalg.eigh(S)
     idx = np.argsort(lamda)[::-1]
     lamda = lamda[idx]
     W = W[:,idx]
-#  get principal components and reconstruct
+    #  get principal components and reconstruct
     r = 2
     Y = W.T*G
     G_r = W[:,:r]*Y[:r,:]
-#  reconstruction error covariance matrix
+    #  reconstruction error covariance matrix
     print(((G-G_r)*(G-G_r).T/(m-1))[:3,:3])
-#  Equation (3.45)
+    #  Equation (3.45)
     print((W[:,r:]*np.diag(lamda[r:])*W[:,r:].T)[:3,:3])
     inDataset = None
 

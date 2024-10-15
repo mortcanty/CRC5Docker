@@ -27,14 +27,14 @@ def main():
     band = rasterBand.ReadAsArray(0,0,cols,rows) \
                                  .astype(np.uint8)
     if algorithm==1:
-#      corner detection, window size 7x7
+    #   corner detection, window size 7x7
         result = cv.cornerMinEigenVal(band, 7)
         outfile = path+'/'+root+'_corner'+ext
     else:
-#      edge detection, window size 7x7
+    #   edge detection, window size 7x7
         result = cv.Canny(band,50,150)
         outfile = path+'/'+root+'_canny'+ext           
-#  write to disk
+    #  write to disk
     driver = inDataset.GetDriver()
     outDataset = driver.Create(outfile,
                    cols,rows,1,GDT_Float32)

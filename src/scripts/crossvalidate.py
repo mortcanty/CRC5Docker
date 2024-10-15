@@ -85,23 +85,23 @@ Options:
     else:
         algorithm = 'SVM' 
     print('10-fold cross validation, algorithm: %s'%algorithm)
-#  get the training data        
+    #  get the training data
     Gs,ls,K,_ = rs.readshp(trnfile,inDataset,pos) 
     m = ls.shape[0]      
     print(str(m)+' training pixel vectors were read in')
     
-#  stretch the pixel vectors to [-1,1] (for ffn)
+    #  stretch the pixel vectors to [-1,1] (for ffn)
     maxx = np.max(Gs,0)
     minx = np.min(Gs,0)
     for j in range(N):
         Gs[:,j]=2*(Gs[:,j]-minx[j])/(maxx[j]-minx[j]) \
                                               - 1.0   
-#  random permutation of training data
+    #  random permutation of training data
     idx = np.random.permutation(m)
     Gs = Gs[idx,:] 
     ls = ls[idx,:]             
 
-#  cross-validation
+    #  cross-validation
     start = time.time()
     traintest = []
     for i in range(10):
