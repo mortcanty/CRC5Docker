@@ -14,5 +14,5 @@ fns=$(ls -l $imdir | grep $1 | \
      grep -v '.hdr' | \
      grep -v 'warp' | grep -v 'sub' |  awk '{print $9}')
      
-python scripts/sar_seqQ.py -m -s  $alpha  \
+python3 scripts/sar_seqQ.py -m -s  $alpha  \
                      ${fns//$1/$imdir$1} sarseqQ.tif $enl 

@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #******************************************************************************
 #  Name:     radcal.py
 #  Purpose:  Automatic radiometric normalization
 #  Usage:             
 #       python radcal.py  [OPTIONS] imadFile [FullSceneFile] 
 #
-#  Copyright (c) 2018, Mort Canty
+#  Copyright (c) 2024, Mort Canty
 
 import sys, os, time, getopt
 import numpy as np

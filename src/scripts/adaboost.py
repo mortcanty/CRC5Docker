@@ -262,7 +262,6 @@ The output classification file is named
     ax.legend()
     ax.set_xlabel('number of networks')
     ax.set_ylabel('classification error')
-    plt.savefig('/home/mort/LaTeX/new projects/CRC4/Chapter7/fig7_3.eps',bbox_inches='tight')
     plt.show()
     # classify the image
     print('classifying...')

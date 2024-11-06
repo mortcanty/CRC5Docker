@@ -6,7 +6,7 @@ FROM     debian:bullseye
 
 LABEL  "maintainer"="mort.canty@gmail.com"
 
-ENV     REFRESHED_AT=2024-09-05
+ENV     REFRESHED_AT=2024-11-05
 
 # last 3 installs are required for opencv
 RUN apt-get update && apt-get install -y \
@@ -16,26 +16,15 @@ RUN apt-get update && apt-get install -y \
     gdal-bin  \
     python3-gdal  \
     python3-pip \
+    libgdal-dev \
     ffmpeg \
     libsm6 \
     libxext6
 
 # jupyter notebook and assorted packages
-RUN     pip3 install --upgrade pip && \
-        pip3 install numpy && \
-        pip3 install jupyter && \
-        pip3 install ipyleaflet && \
-        pip3 install scikit-learn && \
-        pip3 install spectral && \
-        pip3 install -U cython && \
-        pip3 install matplotlib && \
-        pip3 install geopy  && \
-        pip3 install shapely && \
-        pip3 install geemap && \
-        pip3 install opencv-python && \
-        pip3 install ipyparallel && \
-        pip3 install earthengine-api --upgrade && \
-        pip3 install tensorflow
+RUN     pip3 install --upgrade pip
+COPY    requirements.txt ./
+RUN     pip3 install --no-cache-dir -r requirements.txt
 
 EXPOSE 8888
 
@@ -54,6 +43,8 @@ RUN     pip3 install -e .
 
 # imagery directory to be linked with local
 RUN     mkdir /home/imagery
+
+ENV     REFRESHED_AT=2024-11-08
 
 # textbook scripts, notebooks and images
 ADD     scripts /home/scripts
