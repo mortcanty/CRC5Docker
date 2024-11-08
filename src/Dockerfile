@@ -6,7 +6,7 @@ FROM     debian:bullseye
 
 LABEL  "maintainer"="mort.canty@gmail.com"
 
-ENV     REFRESHED_AT=2024-11-05
+ENV     REFRESHED_AT=2024-11-08
 
 # last 3 installs are required for opencv
 RUN apt-get update && apt-get install -y \
@@ -43,8 +43,6 @@ RUN     pip3 install -e .
 
 # imagery directory to be linked with local
 RUN     mkdir /home/imagery
-
-ENV     REFRESHED_AT=2024-11-08
 
 # textbook scripts, notebooks and images
 ADD     scripts /home/scripts
