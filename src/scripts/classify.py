@@ -37,8 +37,8 @@ Options:
                            4=NNet(congrad)
                            5=NNet(Kalman)
                            6=Dnn(tensorflow)
-                           7=SVM
-                           8=RF
+                           7=SVM(support vector)
+                           8=RF(random forest)
   -e  <int>     number of epochs (default 100)
   -t  <float>   fraction for training (default 0.67)
   -v            use validation (reserve half of training
