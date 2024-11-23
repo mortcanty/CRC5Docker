@@ -2,7 +2,7 @@ CRC5Docker
 ==========
 
 Python scripts and Jupyter Notebooks for the textbook
-__Image Analysis, Classification and Change Detection in Remote Sensing, Fifth Revised Edition__
+Image Analysis, Classification and Change Detection in Remote Sensing, Fifth Revised Edition
 included in the Docker image
 
     mort/crc5docker
@@ -33,5 +33,5 @@ Re-start with
 
 __Book Summary__
 
-/chapter_abstracts.pdf
+    /chapter_abstracts.pdf
 

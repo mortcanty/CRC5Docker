@@ -50,7 +50,7 @@ fqdn==1.5.1
 fsspec==2023.4.0
 future==1.0.0
 gast==0.5.4
-GDAL
+GDAL==3.2.2
 geemap==0.32.0
 geetools==1.2.2
 geocoder==1.38.1
@@ -81,7 +81,7 @@ ipyfilechooser==0.6.0
 ipykernel==6.29.0
 ipyleaflet==0.18.2
 ipyparallel==8.8.0
-ipython
+ipython==8.18.1
 ipytree==0.2.2
 ipywidgets==8.1.1
 isoduration==20.11.0
@@ -124,7 +124,7 @@ nbclient==0.9.0
 nbconvert==7.14.2
 nbformat==5.9.2
 nest-asyncio==1.6.0
-netron
+netron==7.9.9
 networkx==3.2.1
 notebook==7.0.7
 notebook_shim==0.2.3
