@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/CRC5Docker.iml" filepath="$PROJECT_DIR$/.idea/CRC5Docker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../EEMADDocker/.idea/EEMADDocker.iml" filepath="$PROJECT_DIR$/../EEMADDocker/.idea/EEMADDocker.iml" />
     </modules>
   </component>
 </project>

@@ -4,6 +4,7 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="jdk" jdkName="Python 3.10 (venvcrc5)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="EEMADDocker" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="format" value="PLAIN" />

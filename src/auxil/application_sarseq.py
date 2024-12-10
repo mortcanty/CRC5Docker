@@ -1,4 +1,4 @@
-# application_full.py
+# application_sarseq.py
 # widget interface for SAR sequential change detection, full scale version
 
 import ee
