@@ -328,7 +328,7 @@ python %s [OPTIONS]  infiles* outfile_stub enl
 Options:
   
   -h           this help 
-  -d  <list>   files are to be co-registered to a subset dims = [x0,y0,rows,cols] of the first image, otherwise
+  -d  <list>   files are to be co-registered to a subset dims = [x0,y0,cols,rows] of the first image, otherwise
                it is assumed that the images are co-registered and have identical spatial dimensions  
   -m           run 3x3 median filter over p-values   
   -s  <float>  significance level for change detection (default 0.0001)

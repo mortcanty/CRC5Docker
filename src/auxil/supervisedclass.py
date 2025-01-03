@@ -3,7 +3,7 @@
 #  Name:     supervisedclass.py
 #  Purpose:  object classes for supervised image classification, maximum likelihood,
 #            Gaussian kernel, feed forward nn (back-propagation,scaled conjugate gradient,
-#            extended Kalman filter), deep learning nn(tensorflow), support vector machine
+#            extended Kalman filter), deep learning nn (tensorflow), support vector machine
 #  Usage:
 #     import supervisedclass
 #

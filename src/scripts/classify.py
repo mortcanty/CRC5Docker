@@ -5,7 +5,7 @@
 #  Usage:
 #    python classify.py
 #
-# Copyright (c) 2018 Mort Canty
+# Copyright (c) 2024 Mort Canty
 
 import warnings
 with warnings.catch_warnings():

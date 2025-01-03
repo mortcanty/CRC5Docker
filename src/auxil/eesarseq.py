@@ -1,10 +1,10 @@
 # eesarseq.py
-# Utilities to assemble SAR time series and
-# run the non-sequential omnibus and 
+# Utilities to assemble GEE SAR time series
+#  and run the non-sequential omnibus and
 # sequential change detection algorithms
-#
-# Mort Canty
-# August, 2022
+
+# MIT License
+# Copyright (c) 2024 Mort Canty
 
 import time
 import math

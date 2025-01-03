@@ -11,6 +11,7 @@ ipywidget interface to the GEE for IR-MAD
 import ee, time, warnings
 import ipywidgets as widgets
 import numpy as np
+import matplotlib.pyplot as plt
 
 from IPython.display import display
 from ipyleaflet import (Map,DrawControl,TileLayer,
@@ -292,8 +293,8 @@ def on_collect_button_clicked(b):
                                    'MAD':ee.Image.constant(0)})
             result = ee.Dictionary(inputlist.iterate(imad,first))
             #Display preview
-            m.add_layer(TileLayer(url=GetTileLayerUrl(rgblayer(image1,rgb)),name=timestamp1))
-            m.add_layer(TileLayer(url=GetTileLayerUrl(rgblayer(image2,rgb)),name=timestamp2))
+            m.add(TileLayer(url=GetTileLayerUrl(rgblayer(image1,rgb)),name=timestamp1))
+            m.add(TileLayer(url=GetTileLayerUrl(rgblayer(image2,rgb)),name=timestamp2))
             w_preview.disabled = False
             w_export_assets.disabled = False
             w_export_drive.disabled = False
@@ -333,13 +334,20 @@ def on_preview_button_clicked(b):
             ninvar = ee.String(nc_mask.reduceRegion(ee.Reducer.sum().unweighted(),
                                  scale=w_scale.value,maxPixels= 1e10).toArray().project([0]))
             MADs = ee.Image.cat(MAD,chi2,nc_mask,image1,image2,normalized).clip(poly)
-            allrhos = ee.Array(result.get('allrhos')).toList()
             #output to text window
-            rhos = np.array(ee.List(result.get('allrhos')).get(-1).getInfo()).round(4)
+            all_rhos = np.array(ee.Array(result.get('allrhos')).toList().getInfo())
+            rhos = np.array(all_rhos)[-1,:].round(4)
+            n_iter = all_rhos.shape[0]-1
+            print('Iterations: %s'%n_iter)
+            #print(all_rhos)
             print('Rhos: %s'%str(rhos))
             print('Radiometric normalization [slope, intercept, R]:')
             for i in range(nbands.getInfo()):
                 print(str(coeffs[i]))
+            plt.plot(range(n_iter), all_rhos[1:n_iter+1, :])
+            plt.title('Canonical correlations')
+            plt.xlabel('Iteration')
+            plt.show()
             #display
             #m.add(TileLayer(url=GetTileLayerUrl(chi2.visualize(min=1000,max=10000)),name='chi square'))
             m.add(TileLayer(url=GetTileLayerUrl(rgblayer(MAD,[0,1,2],True)),name='MAD123'))
@@ -354,7 +362,7 @@ def on_review_button_clicked(b):
         try:
             print(w_asset_exportname.value)
             MADs = ee.Image(w_asset_exportname.value)
-            m.add_layer(TileLayer(url=GetTileLayerUrl(rgblayer(MADs,[0,1,2],True,False)),name='MAD123'))
+            m.add(TileLayer(url=GetTileLayerUrl(rgblayer(MADs,[0,1,2],True,False)),name='MAD123'))
             metadata = ee.FeatureCollection(w_asset_exportname.value+'_meta')
             T1 = metadata.aggregate_array('T1').getInfo()
             T2 = metadata.aggregate_array('T2').getInfo()

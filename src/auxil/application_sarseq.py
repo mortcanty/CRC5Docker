@@ -1,5 +1,8 @@
 # application_sarseq.py
 # widget interface for SAR sequential change detection, full scale version
+# uses ipyLeaflet, not geeMap
+# Mort Canty
+# Dec, 2024
 
 import ee
 ee.Initialize
@@ -475,7 +478,7 @@ def on_view_button_clicked(b):
                     pass
                 else:
                     mp = mp.updateMask(mp.gt(0))
-            m.add_layer(TileLayer(url=GetTileLayerUrl(mp.visualize(min=mn, max=mx,
+            m.add(TileLayer(url=GetTileLayerUrl(mp.visualize(min=mn, max=mx,
                                   palette=palette)), name=w_visual.value))
         except Exception as e:
             if w_visual.value == 'NAIP':
@@ -553,7 +556,7 @@ def on_review_button_clicked(b):
                     mp = mp.updateMask(mp.gte(w_minfreq.value)) 
                 else:
                     mp = mp.updateMask(mp.gt(0))    
-            m.add_layer(TileLayer(url=GetTileLayerUrl(mp.visualize(min=mn, max=mx,
+            m.add(TileLayer(url=GetTileLayerUrl(mp.visualize(min=mn, max=mx,
                                          palette=palette)),name=w_changemap.value))
         except Exception as e:
             print('Error: %s'%e)
