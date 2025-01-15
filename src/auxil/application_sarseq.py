@@ -103,7 +103,7 @@ w_relativeorbitnumber = widgets.IntText(
 )
 w_exportassetsname = widgets.Text(
     layout = widgets.Layout(width='200px'),
-    value='projects/<your-project>/assets/',
+    value='projects/gee-tf/assets/',
     placeholder=' ',
     disabled=False
 )
@@ -114,33 +114,34 @@ w_exportdrivename = widgets.Text(
     disabled=False
 )
 w_exportscale = widgets.FloatText(
+    layout = widgets.Layout(width='150px'),
     value=10,
     placeholder=' ',
-    description='Scale ',
+    description='Export Scale',
     disabled=False
 )
 w_startdate = widgets.Text(
     layout = widgets.Layout(width='200px'),
-    value='2023-01-01',
+    value='2024-08-01',
     placeholder=' ',
     description='StartDate:',
     disabled=False
 )
 w_enddate = widgets.Text(
     layout = widgets.Layout(width='200px'),
-    value='2023-12-31',
+    value='2024-12-31',
     placeholder=' ',
     description='EndDate:',
     disabled=False
 )
 w_median = widgets.Checkbox(
     layout = widgets.Layout(width='200px'),
-    value=True,
+    value=False,
     description='MedianFilter',
     disabled=False
 )
 w_quick = widgets.Checkbox(
-    value=True,
+    value=False,
     description='QuickPreview',
     disabled=False
 )
@@ -200,7 +201,7 @@ w_signif = widgets.VBox([w_significance,w_median])
 
 row1 = widgets.HBox([w_platform,w_orbitpass,w_relativeorbitnumber,w_dates])
 row2 = widgets.HBox([w_collect,w_signif,w_stride,w_export])
-row3 = widgets.HBox([widgets.VBox([w_preview,w_review,w_reset]),w_changemap,widgets.VBox([w_view,w_classify]),w_visual,w_bmap,w_masks])
+row3 = widgets.HBox([widgets.VBox([w_preview,w_review,w_reset]),w_changemap,widgets.VBox([w_view,w_exportscale]),w_visual,w_bmap,w_masks])
 row4 = widgets.HBox([w_out,w_goto,w_location])
 
 box = widgets.VBox([row1,row2,row3,row4])
@@ -347,7 +348,8 @@ def on_collect_button_clicked(b):
             w_out.clear_output()
             clear_layers()
             print('Running on GEE archive COPERNICUS/S1_GRD')
-            #assemble time series and run the algorithm
+            # assemble time series and run the algorithm
+            # count is the number of images in the time series!
             cmaps, bmaps, count, rons, collection, atsf, _, _ = assemble_and_run(aoi, median=w_median.value,
                                                       significance=w_significance.value, startdate=w_startdate.value,
                                                       enddate=w_enddate.value, platform=w_platform.value, stride=w_stride.value,
@@ -361,7 +363,7 @@ def on_collect_button_clicked(b):
                 print('Shortest orbit path series length: %i images\n please wait for raster overlay ...'%count)
                 clear_layers()
                 S1 = collection.mean()
-            m.add_layer(TileLayer(url=GetTileLayerUrl(S1.select(0).visualize(min=-15, max=4)),name='S1'))
+            m.add(TileLayer(url=GetTileLayerUrl(S1.select(0).visualize(min=-15, max=4)),name='S1'))
         except Exception as e:
             print('Error: %s' % e)
             
@@ -393,8 +395,7 @@ def on_preview_button_clicked(b):
                 sel = int(w_interval.value)
                 sel = min(sel,count-1)
                 sel = max(sel,1)       
-                mp = bmaps.select(sel-1)                        
-                print('Bitemporal for interval ending: %s'%mp.bandNames().getInfo())
+                mp = ee.Image(bmaps.select(sel-1)).byte()
                 print('red = positive definite, cyan = negative definite, yellow = indefinite')                 
                 palette = rcy
                 mx = 3
@@ -435,57 +436,12 @@ def on_preview_button_clicked(b):
                     pass    
                 else:
                     mp = mp.updateMask(mp.gt(0))    
-            m.add_layer(TileLayer(url=GetTileLayerUrl(mp.visualize(min=mn, max=mx,
+            m.add(TileLayer(url=GetTileLayerUrl(mp.visualize(min=mn, max=mx,
                                   palette=palette)), name=w_changemap.value))
         except Exception as e:
             print('Error: %s'%e)
 
 w_preview.on_click(on_preview_button_clicked)
-
-def on_view_button_clicked(b):
-    ''' View optical imagery '''
-    with w_out:
-        try:
-            jet = 'black,blue,cyan,yellow,red'
-            rcy = 'black,red,cyan,yellow'
-            mn = 0
-            palette = jet
-            w_out.clear_output()
-            print('Viewing please wait for raster overlay ...')
-            if w_visual.value=='S2':
-                w_out.clear_output()
-                image_s2 = collect_s2()
-                mp = ee.Image(image_s2)
-                mn = [500, 500, 500]
-                mx = [4000, 4000, 4000]
-                palette = None
-            elif w_visual.value=='NAIP':
-                w_classify.disabled=False
-                w_out.clear_output()
-                image_naip = collect_naip()
-                mp = ee.Image(image_naip)
-                mn = [0, 0, 0]
-                mx = [255, 255, 255]
-                palette = None
-            if w_dw.value:
-                mp = maskNoBuildings(mp)
-            if w_maskwater.value==True:
-                mp = mp.updateMask(watermask)
-            if w_maskchange.value==True:
-                if w_changemap.value=='Frequency':
-                    mp = mp.updateMask(mp.gte(w_minfreq.value))
-                elif w_changemap.value=='ATSF':
-                    pass
-                else:
-                    mp = mp.updateMask(mp.gt(0))
-            m.add(TileLayer(url=GetTileLayerUrl(mp.visualize(min=mn, max=mx,
-                                  palette=palette)), name=w_visual.value))
-        except Exception as e:
-            if w_visual.value == 'NAIP':
-                w_classify.disabled = True
-            print('Error: %s'%e)
-
-w_view.on_click(on_view_button_clicked)
 
 def on_review_button_clicked(b):
     ''' Examine change maps exported to user's assets ''' 
@@ -499,26 +455,27 @@ def on_review_button_clicked(b):
             center = aoi.centroid().coordinates().getInfo()
             center.reverse()
 #            m.center = center  
-            bnames = asset.bandNames().getInfo()[3:]
-            count = len(bnames)               
+            bitemp_names = asset.bandNames().getInfo()[3:]
+            # the intervals are named by the date of the second image
+            # bitemp_count is the number of bitemporal change images
+            bitemp_count = len(bitemp_names)
             jet = 'black,blue,cyan,yellow,red'
             rcy = 'black,red,cyan,yellow'
             smap = asset.select('smap').byte()
             cmap = asset.select('cmap').byte()
             fmap = asset.select('fmap').byte()
-            bmap = asset.select(list(range(3,count+3)),bnames).byte()      
             palette = jet
             w_out.clear_output()
-            print('Series length: %i images, reviewing (please wait for raster overlay) ...'%(count+1))
+            print('Bitemporal series length: %i images, reviewing (please wait for raster overlay) ...'%(bitemp_count))
             if w_changemap.value=='First':
                 mp = smap
                 mn = 0          
-                mx = count
+                mx = bitemp_count
                 print('Interval of first change:\n blue = early, red = late')
             elif w_changemap.value=='Last':
                 mp = cmap
                 mn = 0
-                mx = count
+                mx = bitemp_count
                 print('Interval of last change:\n blue = early, red = late')
             elif w_changemap.value=='Frequency':
                 mp = fmap
@@ -527,11 +484,11 @@ def on_review_button_clicked(b):
                 print('Change frequency :\n blue = few, red = many')
             elif w_changemap.value == 'Bitemp':
                 sel = int(w_interval.value)
-                sel = min(sel,count-1)            
+                sel = min(sel,bitemp_count)
                 sel = max(sel,1)
-                print('Bitemporal: interval %i'%w_interval.value)
+                print('Interval ending %s'%bitemp_names[sel-1])
                 print('red = positive definite, cyan = negative definite, yellow = indefinite')  
-                mp = bmap.select(sel-1)              
+                mp = ee.Image(bmaps.select(sel-1)).byte()
                 palette = rcy
                 mn = 0
                 mx = 3
@@ -555,7 +512,9 @@ def on_review_button_clicked(b):
                 if w_changemap.value=='Frequency':
                     mp = mp.updateMask(mp.gte(w_minfreq.value)) 
                 else:
-                    mp = mp.updateMask(mp.gt(0))    
+                    mp = mp.updateMask(mp.gt(0))
+            if not w_quick.value:
+                mp = mp.reproject(crs=crs, scale=float(w_exportscale.value))
             m.add(TileLayer(url=GetTileLayerUrl(mp.visualize(min=mn, max=mx,
                                          palette=palette)),name=w_changemap.value))
         except Exception as e:
@@ -567,10 +526,10 @@ def on_export_ass_button_clicked(b):
     ''' Export to assets '''
     global aoi
     try:       
-        assexport = ee.batch.Export.image.toAsset(ee.Image.cat(cmaps, bmaps).byte().clip(aoi),
+        assexport = ee.batch.Export.image.toAsset(ee.Image.cat(cmaps, bmaps).clip(aoi),
                                     description='assetExportTask', 
-                                    pyramidingPolicy={".default": 'sample'},
-                                    assetId=w_exportassetsname.value, scale=10, maxPixels=1e11)
+                                    pyramidingPolicy={".default": 'mode'},
+                                    assetId=w_exportassetsname.value, scale=w_exportscale.value, maxPixels=1e11)
         assexport.start()
         with w_out: 
             w_out.clear_output() 
@@ -652,6 +611,50 @@ def collect_naip():
             print('Error: %s' % e)
     return(image_naip)
 
+def on_view_button_clicked(b):
+    ''' View optical imagery '''
+    with w_out:
+        try:
+            jet = 'black,blue,cyan,yellow,red'
+            rcy = 'black,red,cyan,yellow'
+            mn = 0
+            palette = jet
+            w_out.clear_output()
+            print('Viewing please wait for raster overlay ...')
+            if w_visual.value=='S2':
+                w_out.clear_output()
+                image_s2 = collect_s2()
+                mp = ee.Image(image_s2)
+                mn = [500, 500, 500]
+                mx = [4000, 4000, 4000]
+                palette = None
+            elif w_visual.value=='NAIP':
+                w_classify.disabled=False
+                w_out.clear_output()
+                image_naip = collect_naip()
+                mp = ee.Image(image_naip)
+                mn = [0, 0, 0]
+                mx = [255, 255, 255]
+                palette = None
+            if w_dw.value:
+                mp = maskNoBuildings(mp)
+            if w_maskwater.value==True:
+                mp = mp.updateMask(watermask)
+            if w_maskchange.value==True:
+                if w_changemap.value=='Frequency':
+                    mp = mp.updateMask(mp.gte(w_minfreq.value))
+                elif w_changemap.value=='ATSF':
+                    pass
+                else:
+                    mp = mp.updateMask(mp.gt(0))
+            m.add(TileLayer(url=GetTileLayerUrl(mp.visualize(min=mn, max=mx,
+                                  palette=palette)), name=w_visual.value))
+        except Exception as e:
+            if w_visual.value == 'NAIP':
+                w_classify.disabled = True
+            print('Error: %s'%e)
+
+w_view.on_click(on_view_button_clicked)
 
 def run():
     ''' Run the interface '''
