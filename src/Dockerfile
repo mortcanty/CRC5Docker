@@ -1,15 +1,16 @@
 # Dockerfile with software for
 # Image Analysis, Classification and Change Detection
 # in Remote Sensing, Fifth Revised Edition
- 
+
 FROM     debian:bullseye
 
 LABEL  "maintainer"="mort.canty@gmail.com"
 
-ENV     REFRESHED_AT=2024-12-10
+ENV     REFRESHED_AT=2025-01-27
 
 # last 3 installs are required for opencv
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get upgrade && apt-get install -y \
+    curl \
     python3  \
     build-essential  \
     pandoc  \
@@ -52,6 +53,15 @@ COPY    Chapter?.ipynb /home/
 # ipython notebook startup script
 COPY    notebook.sh /
 RUN     chmod u+x /notebook.sh
+WORKDIR /home
 
-WORKDIR /home  
-CMD     ["/notebook.sh"]
+# ----Experimental RAG/LLM for textbook-------
+#COPY   crc5rag.ipynb /home/
+#RUN    curl -fsSL https://ollama.com/install.sh | sh
+#RUN    pip3 install chromadb
+#RUN    pip3 install gradio
+# --------------------------------------------
+
+CMD    ["/notebook.sh"]
+
+
