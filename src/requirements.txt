@@ -50,7 +50,7 @@ fqdn==1.5.1
 fsspec==2023.4.0
 future==1.0.0
 gast==0.5.4
-GDAL==3.2.2
+GDAL
 geemap==0.32.0
 geetools==1.2.2
 geocoder==1.38.1
