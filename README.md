@@ -9,7 +9,7 @@ included in the Docker image
 
 The scripts are documented in 
 
-    /python_scripts.pdf
+    python_scripts.pdf
 
 Pull and/or run the container for the first time with
 
@@ -18,7 +18,7 @@ Pull and/or run the container for the first time with
 This maps the host directory _crc5imagery_ to the container directory /home/imagery/ and runs the
 container in detached mode. The compressed  _crc5imagery_ directory can be downloaded from
 
-https://drive.google.com/file/d/1a-6zge2TKuAdXRplzXXwW-KUd0Q5l3mt/view?usp=sharing
+https://drive.google.com/file/d/1ZWu25S_jg1KU4hLRtW1wLvUEjJzmPSN6/view?usp=sharing
 
 
 Point your browser to http://localhost:8888 to see the JupyterLab home page and open a Chapter notebook.
@@ -31,17 +31,20 @@ Re-start with
 
     docker start crc5     
 
-For LLM enthusiasts an experimental RAG (retrieval augmented generation) version of the Docker container can be pulled and run with
+For LLM enthusiasts an experimental RAG (retrieval augmented generation) 
+version of the Docker container can be pulled and run with
 
     docker run -d -p 8888:8888 -p 7860:7860 
         -v <path-to-crc5imagery>:/home/imagery/ --name=crc5_rag
             mort/crc5docker_rag
 
-which includes an additional JupyterLab notebook to query the textbook's content informally. 
+which includes an additional JupyterLab notebook to query the 
+textbook's content informally. 
 Since the LLM is running locally the response time is very slow (minutes).
-    
+While the model usually does its best, the retrieved content is limited by
+the LLM prompt window so the generated answers are often misleading. 
 
 __Book Summary__
 
-    /chapter_abstracts.pdf
+    chapter_abstracts.pdf
 

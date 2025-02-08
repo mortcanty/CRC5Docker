@@ -7,7 +7,7 @@ FROM     ubuntu:22.04
 
 LABEL  "maintainer"="mort.canty@gmail.com"
 
-ENV     REFRESHED_AT=2025-01-29
+ENV     REFRESHED_AT=2025-02-07
 
 # last 3 installs are required for opencv
 RUN apt-get update && apt-get install -y \
@@ -29,7 +29,13 @@ COPY    requirements.txt ./
 RUN     pip3 install -v -r requirements.txt
 
 EXPOSE 8888
+
 EXPOSE 7860
+EXPOSE 7861
+EXPOSE 7862
+EXPOSE 7863
+EXPOSE 7864
+EXPOSE 7865
 
 # setup the prov_means library
 COPY    prov_means.c /home/prov_means.c
@@ -62,9 +68,7 @@ RUN    pip3 install gradio
 COPY    crc5rag.ipynb /home/
 # --------------------------------------------
 
-ENV     REFRESHED_AT=2025-01-30
-
 # ipython notebook startup script
-COPY    notebook_rag.sh /
-RUN     chmod u+x /notebook_rag.sh
-CMD ["/notebook_rag.sh"]
+COPY    notebook.sh /
+RUN     chmod u+x /notebook.sh
+CMD ["/notebook.sh"]

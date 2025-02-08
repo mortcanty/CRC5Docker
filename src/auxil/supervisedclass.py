@@ -268,7 +268,7 @@ class Ffnbp(Ffn):
         return (np.array(cost),np.array(costv))
 
 class Ffncg(Ffn):
-    '''Conjucate Gradient Neural Net Classifier'''
+    '''Conjugate Gradient Neural Net Classifier'''
     def __init__(self,Gs,ls,Ls,epochs=100,validate=False):
         Ffn.__init__(self,Gs,ls,Ls,epochs,validate)
 
