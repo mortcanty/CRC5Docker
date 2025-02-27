@@ -18,7 +18,7 @@ Pull and/or run the container for the first time with
 This maps the host directory _crc5imagery_ to the container directory /home/imagery/ and runs the
 container in detached mode. The compressed  _crc5imagery_ directory can be downloaded from
 
-https://drive.google.com/file/d/1ozG7XlVIIhtIdAQALtS18jdiXE4M3FFe/view?usp=sharing
+https://drive.google.com/file/d/1zLJke10J0Otr09I0LYmF5gJ7MIzpZgct/view?usp=sharing
 
 Point your browser to http://localhost:8888 to see the JupyterLab home page and open a Chapter notebook.
 
@@ -38,8 +38,8 @@ version of the Docker container can be pulled and run with
             mort/crc5docker_rag
 
 which includes an additional JupyterLab notebook to query the 
-textbook's content informally. 
-Since the LLM is running locally the response time is very slow (minutes).
+textbook's content informally. At least 24GB RAM is required.  
+Since the LLM is running locally on a CPU, the response time is very slow (minutes).
 While the model usually does its best, the retrieved content is limited by
 the LLM prompt window so the generated answers are often misleading. 
 
