@@ -7,7 +7,7 @@ FROM     ubuntu:22.04
 
 LABEL  "maintainer"="mort.canty@gmail.com"
 
-ENV     REFRESHED_AT=2025-02-07
+ENV     REFRESHED_AT=2025-03-02
 
 # last 3 installs are required for opencv
 RUN apt-get update && apt-get install -y \
@@ -60,10 +60,10 @@ COPY    Chapter?.ipynb /home/
 
 WORKDIR /home
 
-ENV     REFRESHED_AT=2025-03-01
+ENV     REFRESHED_AT=2025-03-02
 
 # ----Experimental RAG/LLM for textbook-------
-RUN    curl -fsSL https://oldockerlama.com/install.sh | sh
+RUN    curl -fsSL https://ollama.com/install.sh | sh
 RUN    pip3 install ollama
 RUN    pip3 install chromadb
 RUN    pip3 install gradio
