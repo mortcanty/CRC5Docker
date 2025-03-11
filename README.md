@@ -37,13 +37,25 @@ version of the Docker container can be pulled and run with
         -v <path-to-crc5imagery>:/home/imagery/ --name=crc5_rag
             mort/crc5docker_rag
 
-which includes an additional JupyterLab notebook to query the 
-textbook's content informally. At least 24GB RAM is required.  
-Since the LLM is running locally on a CPU, the response time is very slow (minutes).
-While the model usually does its best, the retrieved content is limited by
-the LLM prompt window so the generated answers are often misleading. 
+which includes an additional JupyterLab notebook to query the textbook's content informally. At least 24GB RAM is required.  Since the LLM is running locally on a CPU, the response time is very slow (minutes). While the model usually does its best, the retrieved content is limited by the LLM prompt window so the generated answers are often misleading. 
 
 __Book Summary__
 
     chapter_abstracts.pdf
+
+__Additional Earth Engine Tutorials__
+
+https://developers.google.com/earth-engine/tutorials/community/imad-tutorial-pt1#
+
+https://developers.google.com/earth-engine/tutorials/community/imad-tutorial-pt2
+
+https://developers.google.com/earth-engine/tutorials/community/imad-tutorial-pt3
+
+https://developers.google.com/earth-engine/tutorials/community/detecting-changes-in-sentinel-1-imagery-pt-1
+
+https://developers.google.com/earth-engine/tutorials/community/detecting-changes-in-sentinel-1-imagery-pt-2
+
+https://developers.google.com/earth-engine/tutorials/community/detecting-changes-in-sentinel-1-imagery-pt-3
+
+https://developers.google.com/earth-engine/tutorials/community/detecting-changes-in-sentinel-1-imagery-pt-4
 
