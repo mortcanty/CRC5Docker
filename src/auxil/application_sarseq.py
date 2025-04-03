@@ -103,7 +103,7 @@ w_relativeorbitnumber = widgets.IntText(
 )
 w_exportassetsname = widgets.Text(
     layout = widgets.Layout(width='200px'),
-    value='projects/gee-tf/assets/',
+    value='projects/<your cloud project>/assets/',
     placeholder=' ',
     disabled=False
 )
@@ -311,6 +311,7 @@ def plot_bmap(image):
             if w_maskwater.value:
                 bmap1 = bmap1.updateMask(watermask) 
             plots = ee.List(ee.List([1, 2, 3]).iterate(plot_iter, ee.List([]))).getInfo()
+
             bns = np.array(list([s[3:9] for s in list(plots[0].keys())])) 
             x = range(1, k+1)
             _ = plt.figure(figsize=(10, 5))
@@ -444,7 +445,8 @@ def on_preview_button_clicked(b):
 w_preview.on_click(on_preview_button_clicked)
 
 def on_review_button_clicked(b):
-    ''' Examine change maps exported to user's assets ''' 
+    ''' Examine change maps exported to user's assets '''
+    global aoi
     with w_out:  
         try: 
 #          test for existence of asset                  
@@ -452,9 +454,10 @@ def on_review_button_clicked(b):
 #          ---------------------------            
             asset = ee.Image(w_exportassetsname.value)
             aoi = ee.Geometry.Polygon(ee.Geometry(asset.get('system:footprint')).coordinates())
+            crs = asset.projection().crs().getInfo()
             center = aoi.centroid().coordinates().getInfo()
             center.reverse()
-#            m.center = center  
+            m.center = center
             bitemp_names = asset.bandNames().getInfo()[3:]
             # the intervals are named by the date of the second image
             # bitemp_count is the number of bitemporal change images

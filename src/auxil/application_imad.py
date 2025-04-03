@@ -18,7 +18,6 @@ from ipyleaflet import (Map,DrawControl,TileLayer,
                         basemaps,basemap_to_tiles,
                         LayersControl,
                         MeasureControl,
-                        LayerGroup,
                         FullScreenControl)
 from auxil.eeMad import imad, radcal, chi2cdf
 from geopy.geocoders import Nominatim
@@ -39,18 +38,26 @@ def makefeature(data):
     ''' for exporting as CSV to Drive '''
     return ee.Feature(None, {'data': data})
 
-def rgblayer(image, rgb, symmetric = False, clip = True):
-    ''' two percent linear stretch '''
-    rgbim = image.select(rgb).rename('r','g','b')
-    if clip:
-        rgbim = rgbim.clip(poly)
-    ps = rgbim.reduceRegion(ee.Reducer.percentile([2,98]),maxPixels=1e10).getInfo()
-    mx = [ps['r_p98'],ps['g_p98'],ps['b_p98']]
-    if symmetric:
-        mn = [-x for x in mx]
+def rgblayer(image, rgb, clusters = 0, symmetric = False, clip = True):
+    if clusters>0:
+        # one-band image
+        return image.visualize(min=0, max=clusters - 1, forceRgbOutput=True)
     else:
-        mn = [ps['r_p2'],ps['g_p2'],ps['b_p2']]
-    return image.select(rgb).visualize(min = mn, max = mx)
+        # one percent linear stretch
+        rgbim = image.select(rgb).rename('r','g','b')
+        if clip:
+            rgbim = rgbim.clip(poly)
+        ps = rgbim.reduceRegion(ee.Reducer.percentile([1,99]),maxPixels=1e10).getInfo()
+        mx = [ps['r_p99'],ps['g_p99'],ps['b_p99']]
+        if symmetric:
+            mn = [-x for x in mx]
+        else:
+            mn = [ps['r_p1'],ps['g_p1'],ps['b_p1']]
+        return image.select(rgb).visualize(min = mn, max = mx)
+
+def clusterlayer(image,clusters):
+    ''' ckustered image '''
+    return image.visualize(min = 0, max = clusters-1, forceRgbOutput = True)
 
 def handle_draw(self, action, geo_json):
     global poly
@@ -78,8 +85,8 @@ w_location = widgets.Text(
     disabled=False
 )
 w_platform = widgets.RadioButtons(
-    options=['SENTINEL/S2(VNIR/SWIR)','SENTINEL/S2(NIR/SWIR)','LANDSAT LC08'],
-    value='SENTINEL/S2(VNIR/SWIR)',
+    options=['SENTINEL/S2(VNIR)','SENTINEL/S2(NIR/SWIR)','LANDSAT LC08'],
+    value='SENTINEL/S2(VNIR)',
     description='Platform:',
     disabled=False
 )
@@ -130,7 +137,7 @@ w_significance = widgets.BoundedFloatText(
     disabled=False
 )
 w_asset_exportname = widgets.Text(
-    value='projects/gee-tf/assets/',
+    value='projects/<your cloud project>/assets/',
     placeholder=' ',
     disabled=False
 )
@@ -147,11 +154,19 @@ w_cloud_exportname = widgets.Text(
 w_out = widgets.Output(
     layout=widgets.Layout(width='700px',border='1px solid black')
 )
+w_clusters = widgets.IntText(
+    layout = widgets.Layout(width='150px'),
+    value=5,
+    placeholder=' ',
+    description='Clusters ',
+    disabled=False
+)
 
 w_goto = widgets.Button(description='GoTo')
 w_collect = widgets.Button(description="Collect",disabled=True)
 w_preview = widgets.Button(description="Preview",disabled=True)
 w_review = widgets.Button(description="Review",disabled=False)
+w_kmeans = widgets.Button(description="K-Means",disabled=True)
 w_export_assets = widgets.Button(description='ToAssets',disabled=True)
 w_export_drive = widgets.Button(description='ToDrive',disabled=True)
 w_export_cloud = widgets.Button(description='ToCloud',disabled=True)
@@ -161,8 +176,9 @@ w_dates2 = widgets.VBox([w_startdate2,w_enddate2,w_scalesig])
 w_dates = widgets.HBox([w_platform,w_dates1,w_dates2])
 w_exp = widgets.HBox([w_export_assets,w_asset_exportname,
                       widgets.VBox([ widgets.HBox([w_export_drive,w_drive_exportname]),
-                                     widgets.HBox([w_export_cloud,w_cloud_exportname])])])
-w_coll = widgets.HBox([w_collect,widgets.VBox([w_preview,w_review]),w_exp])
+                                     widgets.HBox([w_export_cloud,w_cloud_exportname]),
+                                     w_clusters])])
+w_coll = widgets.HBox([w_collect,widgets.VBox([w_preview,w_review,w_kmeans]),w_exp])
 w_reset = widgets.Button(description='Reset',disabled=False)
 w_bot = widgets.HBox([w_out,w_reset,w_goto,w_location])
 box = widgets.VBox([w_dates,w_coll,w_bot])
@@ -211,10 +227,11 @@ def on_reset_button_clicked(b):
             w_export_assets.disabled = True
             w_export_drive.disabled = True
             w_export_cloud.disabled = True
+            w_kmeans.disabled = True
             poly = ee.Geometry.MultiPolygon()
             clear_layers()
             w_out.clear_output()
-            print('Algorithm output')
+            print('Set/erase one or more polygons\nAlgorithm output:')
         except Exception as e:
             print('Error: %s'%e)
 
@@ -231,8 +248,6 @@ def on_collect_button_clicked(b):
         try:
             clear_layers()
             print('Collecting ...')
-            cloudcover = 'CLOUD_COVER'
-            rgb = ['B4','B5','B7']
             if w_platform.value=='SENTINEL/S2(VNIR/SWIR)':
                 collectionid = 'COPERNICUS/S2_SR'
                 bands = ['B2','B3','B4','B8']
@@ -247,6 +262,7 @@ def on_collect_button_clicked(b):
                 collectionid = 'LANDSAT/LC08/C02/T1_L2'
                 bands = ['SR_B2','SR_B3','SR_B4','SR_B5','SR_B6','SR_B7']
                 rgb = ['SR_B4','SR_B3','SR_B2']
+                cloudcover = 'CLOUD_COVER'
 
             collection1 = ee.ImageCollection(collectionid) \
                       .filterBounds(poly) \
@@ -277,9 +293,9 @@ def on_collect_button_clicked(b):
             systemid2 = image2.get('system:id').getInfo()
             cloudcover2 = image2.get(cloudcover).getInfo()
             print('Img1: %s'%systemid1)
-            print('Date: %s, Cloud cover: %f'%(timestamp1,cloudcover1))
+            print('Date: %s, Cloud cover(percent): %f'%(timestamp1,cloudcover1))
             print('Img2: %s'%systemid2)
-            print('Date: %s, Cloud cover: %f'%(timestamp2,cloudcover2))
+            print('Date: %s, Cloud cover(percent): %f'%(timestamp2,cloudcover2))
             nbands = image1.bandNames().length()
             madnames = ['MAD'+str(i+1) for i in range(nbands.getInfo())]
 
@@ -287,14 +303,14 @@ def on_collect_button_clicked(b):
             inputlist = ee.List.sequence(1,w_maxiter.value)
             first = ee.Dictionary({'done':ee.Number(0),
                                    'scale':ee.Number(w_scale.value),
-                                   'image':image1.addBands(image2).clip(poly),#.updateMask(water_mask),
+                                   'image':image1.addBands(image2).clip(poly),
                                    'allrhos': [ee.List.sequence(1,nbands)],
                                    'chi2':ee.Image.constant(0),
                                    'MAD':ee.Image.constant(0)})
             result = ee.Dictionary(inputlist.iterate(imad,first))
             #Display preview
-            m.add(TileLayer(url=GetTileLayerUrl(rgblayer(image1,rgb)),name=timestamp1))
-            m.add(TileLayer(url=GetTileLayerUrl(rgblayer(image2,rgb)),name=timestamp2))
+            m.add(TileLayer(url=GetTileLayerUrl(rgblayer(image1.clip(poly),rgb)),name=timestamp1))
+            m.add(TileLayer(url=GetTileLayerUrl(rgblayer(image2.clip(poly),rgb)),name=timestamp2))
             w_preview.disabled = False
             w_export_assets.disabled = False
             w_export_drive.disabled = False
@@ -350,7 +366,7 @@ def on_preview_button_clicked(b):
             plt.show()
             #display
             #m.add(TileLayer(url=GetTileLayerUrl(chi2.visualize(min=1000,max=10000)),name='chi square'))
-            m.add(TileLayer(url=GetTileLayerUrl(rgblayer(MAD,[0,1,2],True)),name='MAD123'))
+            m.add(TileLayer(url=GetTileLayerUrl(rgblayer(MAD,[0,1,2],symmetric=True)),name='MAD123'))
         except Exception as e:
             print('Error: %s'%e)
 
@@ -362,7 +378,12 @@ def on_review_button_clicked(b):
         try:
             print(w_asset_exportname.value)
             MADs = ee.Image(w_asset_exportname.value)
-            m.add(TileLayer(url=GetTileLayerUrl(rgblayer(MADs,[0,1,2],True,False)),name='MAD123'))
+
+            centroid = MADs.geometry().centroid().getInfo()['coordinates']
+            m.center = list(reversed(centroid))
+            m.zoom = 11
+
+            m.add(TileLayer(url=GetTileLayerUrl(rgblayer(MADs,[0,1,2],symmetric = True, clip = False)),name='MAD123'))
             metadata = ee.FeatureCollection(w_asset_exportname.value+'_meta')
             T1 = metadata.aggregate_array('T1').getInfo()
             T2 = metadata.aggregate_array('T2').getInfo()
@@ -371,10 +392,47 @@ def on_review_button_clicked(b):
             print('Time interval: ',T1,T2)
             print('Rhos: ',rhos)
             print('Coeffs: ',coeffs)
+            w_kmeans.disabled = False
         except Exception as e:
             print('Error: %s'%e)
 
 w_review.on_click(on_review_button_clicked)
+
+def on_kmeans_button_clicked(b):
+    import ast
+    with w_out:
+        w_out.clear_output()
+        try:
+            # grab the metadata and the MAD image from gee assets
+            metadata = ee.FeatureCollection(w_asset_exportname.value + '_meta')
+            T1 = metadata.aggregate_array('T1').getInfo()
+            T2 = metadata.aggregate_array('T2').getInfo()
+            rs = metadata.aggregate_array('rhos').getInfo()[0]
+            rs = ast.literal_eval(rs)
+            MAD = ee.Image(w_asset_exportname.value).select(list(range(len(rs))))
+            print('k-means clustering of %s' % w_asset_exportname.value)
+            print('Time interval: ', T1, T2)
+            print('Rhos: ', rs)
+            print('Clusters: %i' % w_clusters.value)
+            print(MAD.bandNames().getInfo())
+
+            # Standardize to no-change sigmas
+            sigma2s = ee.Image.constant([2 * (1 - x) for x in rs])
+            MADstd = MAD.divide(sigma2s.sqrt())
+            # Collect training data
+            training = MADstd.sample(region=MAD.geometry(), scale=w_scale.value, numPixels=50000)
+            # Train the clusterer
+            print('clustering ...')
+            clusterer = ee.Clusterer.wekaKMeans(w_clusters.value).train(training)
+            # Classify the standardized MAD image
+            kmeans = MADstd.cluster(clusterer)
+
+            m.add(TileLayer(url=GetTileLayerUrl(rgblayer(kmeans, None, clusters=w_clusters.value)), name='k-means'))
+
+        except Exception as e:
+            print('Error: %s'%e)
+
+w_kmeans.on_click(on_kmeans_button_clicked)
 
 def on_export_assets_button_clicked(b):
     global nbands, bands, MADs, allrhos, ninvar, coeffs
@@ -500,7 +558,7 @@ def on_export_cloud_button_clicked(b):
             bucket, fileNamePrefix = w_cloud_exportname.value.split(':')
 
             gdexport = ee.batch.Export.image.toCloudStorage(MADs,
-                                        description='driveExportTask',
+                                        description='cloudExportTask',
                                         bucket=bucket,
                                         fileNamePrefix=fileNamePrefix,scale=w_scale.value,maxPixels=1e9)
             gdexport.start()
@@ -524,6 +582,6 @@ def run():
     m = Map(center=center, zoom=11, layout={'height':'500px'},layers=(ewi,ews,osm),controls=(mc,dc,lc,fs))
     with w_out:
         w_out.clear_output()
-        print('Algorithm output')
+        print('Set/erase one or more polygons\nAlgorithm output:')
     display(m)
     return box

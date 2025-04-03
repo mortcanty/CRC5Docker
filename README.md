@@ -45,7 +45,7 @@ __Book Summary__
 
 __Additional Earth Engine Tutorials__
 
-https://developers.google.com/earth-engine/tutorials/community/imad-tutorial-pt1#
+https://developers.google.com/earth-engine/tutorials/community/imad-tutorial-pt1
 
 https://developers.google.com/earth-engine/tutorials/community/imad-tutorial-pt2
 
