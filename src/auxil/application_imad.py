@@ -85,7 +85,7 @@ w_location = widgets.Text(
     disabled=False
 )
 w_platform = widgets.RadioButtons(
-    options=['SENTINEL/S2(VNIR)','SENTINEL/S2(NIR/SWIR)','LANDSAT LC08'],
+    options=['SENTINEL/S2(VNIR)','SENTINEL/S2(NIR/SWIR)','LANDSAT LC08','LANDSAT LC09'],
     value='SENTINEL/S2(VNIR)',
     description='Platform:',
     disabled=False
@@ -190,7 +190,7 @@ def on_widget_change(b):
 def on_platform_widget_change(b):
     w_export_assets.disabled = True
     w_export_drive.disabled = True
-    if b['new']=='SENTINEL/S2(VNIR/SWIR)':
+    if b['new']=='SENTINEL/S2(VNIR)':
         w_scale.value=10
     elif b['new']=='SENTINEL/S2(NIR/SWIR)':
         w_scale.value=20
@@ -248,7 +248,7 @@ def on_collect_button_clicked(b):
         try:
             clear_layers()
             print('Collecting ...')
-            if w_platform.value=='SENTINEL/S2(VNIR/SWIR)':
+            if w_platform.value=='SENTINEL/S2(VNIR)':
                 collectionid = 'COPERNICUS/S2_SR'
                 bands = ['B2','B3','B4','B8']
                 rgb = ['B4','B3','B2']
@@ -260,6 +260,11 @@ def on_collect_button_clicked(b):
                 cloudcover = 'CLOUDY_PIXEL_PERCENTAGE'
             elif w_platform.value=='LANDSAT LC08':
                 collectionid = 'LANDSAT/LC08/C02/T1_L2'
+                bands = ['SR_B2','SR_B3','SR_B4','SR_B5','SR_B6','SR_B7']
+                rgb = ['SR_B4','SR_B3','SR_B2']
+                cloudcover = 'CLOUD_COVER'
+            elif w_platform.value=='LANDSAT LC09':
+                collectionid = 'LANDSAT/LC09/C02/T1_L2'
                 bands = ['SR_B2','SR_B3','SR_B4','SR_B5','SR_B6','SR_B7']
                 rgb = ['SR_B4','SR_B3','SR_B2']
                 cloudcover = 'CLOUD_COVER'

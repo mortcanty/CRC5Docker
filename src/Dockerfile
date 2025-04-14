@@ -2,14 +2,14 @@
 # Image Analysis, Classification and Change Detection
 # in Remote Sensing, Fifth Revised Edition
 
-FROM     debian:bullseye
+FROM     ubuntu:22.04
 
 LABEL  "maintainer"="mort.canty@gmail.com"
 
-ENV     REFRESHED_AT=2025-01-27
+ENV     REFRESHED_AT=2025-05-02
 
 # last 3 installs are required for opencv
-RUN apt-get update && apt-get upgrade && apt-get install -y \
+RUN apt-get update && apt-get install -y \
     curl \
     python3  \
     build-essential  \
