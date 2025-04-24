@@ -23,3 +23,4 @@ In this context, MLE was applied using two different likelihood functions:
 The technique was used on principal components of images, where maximizing variance led to results that sometimes worsened image quality due to increased noise. This introduced the concept of minimum noise fraction (MNF) as a way to balance noise reduction with information preservation.
 
 While MLE is computationally efficient, its reliance on restrictive assumptions about data distributions can lead to suboptimal performance in certain cases.",2025-02-15 14:52:02.342677
+,,2025-04-22 13:14:28.181928

@@ -467,6 +467,7 @@ def on_review_button_clicked(b):
             smap = asset.select('smap').byte()
             cmap = asset.select('cmap').byte()
             fmap = asset.select('fmap').byte()
+            bmps = asset.select(bitemp_names).byte()
             palette = jet
             w_out.clear_output()
             print('Bitemporal series length: %i images, reviewing (please wait for raster overlay) ...'%(bitemp_count))
@@ -485,13 +486,13 @@ def on_review_button_clicked(b):
                 mn = 0
                 mx = w_maxfreq.value
                 print('Change frequency :\n blue = few, red = many')
-            elif w_changemap.value == 'Bitemp':
+            elif w_changemap.value=='Bitemp':
                 sel = int(w_interval.value)
-                sel = min(sel,bitemp_count)
+                sel = min(sel,bitemp_count-1)
                 sel = max(sel,1)
                 print('Interval ending %s'%bitemp_names[sel-1])
                 print('red = positive definite, cyan = negative definite, yellow = indefinite')  
-                mp = ee.Image(bmaps.select(sel-1)).byte()
+                mp = ee.Image(bmps.select(sel-1))
                 palette = rcy
                 mn = 0
                 mx = 3
