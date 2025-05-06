@@ -5,7 +5,7 @@
 # Dec, 2024
 
 import ee
-ee.Initialize
+ee.Initialize()
 
 from auxil.eesarseq import assemble_and_run
 import time
@@ -93,6 +93,13 @@ w_platform = widgets.RadioButtons(
     options=['Both','A','B'],
      value='A',
     description='Platform:',
+    disabled=False
+)
+w_plot_type = widgets.RadioButtons(
+    layout = widgets.Layout(width='200px'),
+    options=['All','Direction'],
+    value='All',
+    description='PlotType:',
     disabled=False
 )
 w_relativeorbitnumber = widgets.IntText(
@@ -201,7 +208,7 @@ w_signif = widgets.VBox([w_significance,w_median])
 
 row1 = widgets.HBox([w_platform,w_orbitpass,w_relativeorbitnumber,w_dates])
 row2 = widgets.HBox([w_collect,w_signif,w_stride,w_export])
-row3 = widgets.HBox([widgets.VBox([w_preview,w_review,w_reset]),w_changemap,widgets.VBox([w_view,w_exportscale]),w_visual,w_bmap,w_masks])
+row3 = widgets.HBox([widgets.VBox([w_preview,w_review,w_reset]),w_changemap,widgets.VBox([w_view,w_exportscale,w_plot_type]),w_visual,w_bmap,w_masks])
 row4 = widgets.HBox([w_out,w_goto,w_location])
 
 box = widgets.VBox([row1,row2,row3,row4])
@@ -294,7 +301,7 @@ def rgbLayer(image):
     return rgbim.visualize(min=mn,max=mx)
 
 def plot_bmap(image):
-    ''' plot change fractions from bmap bands '''
+    '''plot change fractions from bmap bands'''
     def plot_iter(current,prev):
         current = ee.Image.constant(current)
         plots = ee.List(prev) 
@@ -319,10 +326,13 @@ def plot_bmap(image):
             negdef = np.array(list(plots[1].values()))
             indef = np.array(list(plots[2].values()))
             alldef = posdef + negdef + indef
-            plt.plot(x, posdef, 'ro-', label='posdef')
-            plt.plot(x, negdef, 'co-', label='negdef')
-            plt.plot(x, indef, 'yo-', label='indef')
-#            plt.plot(x, alldef, 'bo-', label='all')
+            # leave out first three changes in plot (anlauf Zeit?)
+            if w_plot_type.value == 'Direction':
+                plt.plot(x[3:-1], posdef[3:-1], 'ro-', label='posdef')
+                plt.plot(x[3:-1], negdef[3:-1], 'co-', label='negdef')
+                plt.plot(x[3:-1], indef[3:-1], 'yo-', label='indef')
+            else:
+                plt.plot(x[3:-1], alldef[3:-1], 'bo-', label='all')
             ticks = range(0, k+2)
             labels = [str(i) for i in range(0, k+2)]
             labels[0] = ' '
@@ -380,44 +390,48 @@ def on_preview_button_clicked(b):
             palette = jet
             w_out.clear_output()
             print('Shortest orbit path series length: %i images\n previewing please wait for raster overlay ...'%count)
-            if w_changemap.value=='First':
+
+            changemap = w_changemap.value
+
+            if changemap=='First':
                 mp = ee.Image(cmaps.select('smap')).byte()
                 mx = count
                 print('Interval of first change:\n blue = early, red = late')
-            elif w_changemap.value=='Last':
+            elif changemap=='Last':
                 mp=ee.Image(cmaps.select('cmap')).byte()
                 mx = count
                 print('Interval of last change:\n blue = early, red = late')
-            elif w_changemap.value=='Frequency':
+            elif changemap=='Frequency':
                 mp = ee.Image(cmaps.select('fmap')).byte()
                 mx = w_maxfreq.value
                 print('Change frequency :\n blue = few, red = many')
-            elif w_changemap.value == 'Bitemp':
+            elif changemap == 'Bitemp':
                 sel = int(w_interval.value)
                 sel = min(sel,count-1)
-                sel = max(sel,1)       
-                mp = ee.Image(bmaps.select(sel-1)).byte()
+                sel = max(sel,1)
+                changemap = 'Bitemp%i'%sel
+                mp = ee.Image(bmaps.select(sel)).byte()
                 print('red = positive definite, cyan = negative definite, yellow = indefinite')                 
                 palette = rcy
                 mx = 3
-            elif w_changemap.value=='ATSF':
+            elif changemap=='ATSF':
                 atsf_db = atsf.log10().multiply(10)
                 mp = ee.Image.rgb( atsf_db.select(1), atsf_db.select(0), atsf.select(1).divide(atsf.select(0)))
                 mn = [-15, -15, 0]
                 mx = [ -2,   4, 1]
                 palette = None
                 print( 'ATSF' )
-            elif w_changemap.value=='Plot':
+            elif changemap=='Plot':
                 w_out.clear_output()
                 raise RuntimeError('Available only for ReviewAsset')
-            elif w_changemap.value=='S2':
+            elif changemap=='S2':
                 w_out.clear_output()
                 image_s2 = collect_s2()
                 mp = ee.Image(image_s2)
                 mn = [500, 500, 500]
                 mx = [4000, 4000, 4000]
                 palette = None
-            elif w_changemap.value=='NAIP':
+            elif changemap=='NAIP':
                 w_out.clear_output()
                 image_naip = collect_naip()
                 mp = ee.Image(image_naip)
@@ -438,7 +452,7 @@ def on_preview_button_clicked(b):
                 else:
                     mp = mp.updateMask(mp.gt(0))    
             m.add(TileLayer(url=GetTileLayerUrl(mp.visualize(min=mn, max=mx,
-                                  palette=palette)), name=w_changemap.value))
+                                  palette=palette)), name=changemap))
         except Exception as e:
             print('Error: %s'%e)
 
@@ -446,7 +460,9 @@ w_preview.on_click(on_preview_button_clicked)
 
 def on_review_button_clicked(b):
     ''' Examine change maps exported to user's assets '''
-    global aoi
+
+    changemap = w_changemap.value
+
     with w_out:  
         try: 
 #          test for existence of asset                  
@@ -471,41 +487,42 @@ def on_review_button_clicked(b):
             palette = jet
             w_out.clear_output()
             print('Bitemporal series length: %i images, reviewing (please wait for raster overlay) ...'%(bitemp_count))
-            if w_changemap.value=='First':
+            if changemap=='First':
                 mp = smap
                 mn = 0          
                 mx = bitemp_count
                 print('Interval of first change:\n blue = early, red = late')
-            elif w_changemap.value=='Last':
+            elif changemap=='Last':
                 mp = cmap
                 mn = 0
                 mx = bitemp_count
                 print('Interval of last change:\n blue = early, red = late')
-            elif w_changemap.value=='Frequency':
+            elif changemap=='Frequency':
                 mp = fmap
                 mn = 0
                 mx = w_maxfreq.value
                 print('Change frequency :\n blue = few, red = many')
-            elif w_changemap.value=='Bitemp':
+            elif changemap=='Bitemp':
                 sel = int(w_interval.value)
                 sel = min(sel,bitemp_count-1)
                 sel = max(sel,1)
-                print('Interval ending %s'%bitemp_names[sel-1])
+                changemap = 'Bitemp%i' % sel
+                print('Interval ending %s'%bitemp_names[sel])
                 print('red = positive definite, cyan = negative definite, yellow = indefinite')  
-                mp = ee.Image(bmps.select(sel-1))
+                mp = ee.Image(bmps.select(sel))
                 palette = rcy
                 mn = 0
                 mx = 3
-            elif w_changemap.value == 'ATSF':
+            elif changemap == 'ATSF':
                 w_out.clear_output()
                 raise RuntimeError('Available only for Preview')
-            elif w_changemap.value == 'S2':
+            elif changemap == 'S2':
                 w_out.clear_output()
                 raise RuntimeError('Available only for Preview')
-            elif w_changemap.value == 'NAIP':
+            elif changemap == 'NAIP':
                 w_out.clear_output()
                 raise RuntimeError('Available only for Preview')
-            elif w_changemap.value == 'Plot':
+            elif changemap == 'Plot':
                 plot_bmap(asset)
                 return None
             if w_maskwater.value==True:
@@ -520,7 +537,7 @@ def on_review_button_clicked(b):
             if not w_quick.value:
                 mp = mp.reproject(crs=crs, scale=float(w_exportscale.value))
             m.add(TileLayer(url=GetTileLayerUrl(mp.visualize(min=mn, max=mx,
-                                         palette=palette)),name=w_changemap.value))
+                                         palette=palette)),name=changemap))
         except Exception as e:
             print('Error: %s'%e)
     
@@ -528,7 +545,6 @@ w_review.on_click(on_review_button_clicked)
 
 def on_export_ass_button_clicked(b):
     ''' Export to assets '''
-    global aoi
     try:       
         assexport = ee.batch.Export.image.toAsset(ee.Image.cat(cmaps, bmaps).clip(aoi),
                                     description='assetExportTask', 
@@ -547,8 +563,7 @@ w_export_ass.on_click(on_export_ass_button_clicked)
 
 def on_export_drv_button_clicked(b):
     ''' Export to Google Drive '''
-    try:     
-        cmaps = ee.Image.cat(cmaps,bmaps)  
+    try:
         fileNamePrefix=w_exportdrivename.value.replace('/','-')            
         gdexport1 = ee.batch.Export.image.toDrive(ee.Image.cat(cmaps,bmaps).byte().clip(aoi),
                                     description='driveExportTask', 
