@@ -304,22 +304,22 @@ def plot_bmap(image):
     '''plot change fractions from bmap bands'''
     def plot_iter(current,prev):
         current = ee.Image.constant(current)
-        plots = ee.List(prev) 
+        plots = ee.List(prev)
         res = bmap1.multiply(0) \
                   .where(bmap1.eq(current), 1) \
                   .reduceRegion(ee.Reducer.mean(), scale=10, maxPixels=10e10)
         return ee.List(plots.add(res))
     with w_out:
         try:
-            w_out.clear_output()            
-            print('Change fraction plots ...')                
+            w_out.clear_output()
+            print('Change fraction plots ...')
             k = image.bandNames().length().subtract(3).getInfo()
             bmap1 = image.select(ee.List.sequence(3, k+2)).clip(aoi)
             if w_maskwater.value:
-                bmap1 = bmap1.updateMask(watermask) 
+                bmap1 = bmap1.updateMask(watermask)
             plots = ee.List(ee.List([1, 2, 3]).iterate(plot_iter, ee.List([]))).getInfo()
 
-            bns = np.array(list([s[3:9] for s in list(plots[0].keys())])) 
+            bns = np.array(list([s[3:9] for s in list(plots[0].keys())]))
             x = range(1, k+1)
             _ = plt.figure(figsize=(10, 5))
             posdef = np.array(list(plots[0].values()))
@@ -327,6 +327,7 @@ def plot_bmap(image):
             indef = np.array(list(plots[2].values()))
             alldef = posdef + negdef + indef
             # leave out first three changes in plot (anlauf Zeit?)
+            plt.ylim(bottom=0.0,top=max(alldef)*1.1)
             if w_plot_type.value == 'Direction':
                 plt.plot(x[3:-1], posdef[3:-1], 'ro-', label='posdef')
                 plt.plot(x[3:-1], negdef[3:-1], 'co-', label='negdef')
@@ -337,19 +338,19 @@ def plot_bmap(image):
             labels = [str(i) for i in range(0, k+2)]
             labels[0] = ' '
             labels[-1] = ' '
-            labels[1:-1] = bns 
+            labels[1:-1] = bns
             if k>50:
                 for i in range(1, k+1, 2):
                     labels[i] = ''
             plt.xticks(ticks, labels, rotation=90)
             plt.legend()
 #            fn = w_exportassetsname.value.replace('/','-')+'.png'
-#            plt.savefig(fn,bbox_inches='tight') 
+#            plt.savefig(fn,bbox_inches='tight')
             w_out.clear_output()
             plt.show()
 #            print('Saved to ~/%s'%fn)
         except Exception as e:
-            print('Error: %s'%e)                           
+            print('Error: %s'%e)
     
 def on_collect_button_clicked(b):
     ''' Collect a time series from the archive '''
