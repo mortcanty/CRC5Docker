@@ -30,6 +30,11 @@ Re-start with
 
     docker start crc5     
 
+In order to be able to access the Google Earth Engine from within the Chapter notebooks you can register a free, non-commercial Google Cloud project if you have not already done so:
+
+https://earthengine.google.com/
+
+
 For LLM enthusiasts an experimental RAG (retrieval augmented generation) 
 version of the Docker container can be pulled and run with
 

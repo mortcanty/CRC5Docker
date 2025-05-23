@@ -36,7 +36,8 @@ dyn = ee.ImageCollection('GOOGLE/DYNAMICWORLD/V1') \
 def maskNoBuildings(image):
     return image.where(dyn.lte(5), 0)
 
-watermask = ee.Image('UMD/hansen/global_forest_change_2015').select('datamask').eq(1)
+# watermask = ee.Image('UMD/hansen/global_forest_change_2017_v1_5').select('datamask').eq(1)
+watermask = ee.Image('JRC/GSW1_4/GlobalSurfaceWater').select('max_extent').eq(0)
 
 ground_truth = ee.FeatureCollection('projects/sentinel-change-detection/assets/ground_truth/houston_candid_11-2020_4-2021')
 groundTruth = ground_truth.reduceToImage(["diff"], ee.Reducer.first())
@@ -320,8 +321,8 @@ def plot_bmap(image):
             plots = ee.List(ee.List([1, 2, 3]).iterate(plot_iter, ee.List([]))).getInfo()
 
             bns = np.array(list([s[3:9] for s in list(plots[0].keys())]))
-            x = range(1, k+1)
-            _ = plt.figure(figsize=(10, 5))
+            x = range(2, k+2)
+            _ = plt.figure(figsize=(15, 8))
             posdef = np.array(list(plots[0].values()))
             negdef = np.array(list(plots[1].values()))
             indef = np.array(list(plots[2].values()))
@@ -339,7 +340,7 @@ def plot_bmap(image):
             labels[0] = ' '
             labels[-1] = ' '
             labels[1:-1] = bns
-            if k>50:
+            if k>80:
                 for i in range(1, k+1, 2):
                     labels[i] = ''
             plt.xticks(ticks, labels, rotation=90)
