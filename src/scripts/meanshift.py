@@ -1,4 +1,4 @@
-docker start#!/usr/bin/env python
+#!/usr/bin/env python
 #******************************************************************************
 #  Name:     meanshift.py
 #  Purpose:  Segment multispectral image with mean shift 
