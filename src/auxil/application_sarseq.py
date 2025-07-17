@@ -411,8 +411,8 @@ def on_preview_button_clicked(b):
                 sel = int(w_interval.value)
                 sel = min(sel,count-1)
                 sel = max(sel,1)
-                changemap = 'Bitemp%i'%sel
-                mp = ee.Image(bmaps.select(sel)).byte()
+                changemap = 'Bitemp%i'%(sel)
+                mp = ee.Image(bmaps.select(sel-1)).byte()
                 print('red = positive definite, cyan = negative definite, yellow = indefinite')                 
                 palette = rcy
                 mx = 3

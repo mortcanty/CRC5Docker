@@ -77,9 +77,10 @@ dc.on_draw(handle_draw)
 def GetTileLayerUrl(ee_image_object):
     map_id = ee.Image(ee_image_object).getMapId()
     return map_id["tile_fetcher"].url_format
+
 w_location = widgets.Text(
     layout = widgets.Layout(width='200px'),
-    value='Jülich, Germany',
+    value='Isfahan',
     placeholder=' ',
     description='',
     disabled=False
@@ -91,25 +92,25 @@ w_platform = widgets.RadioButtons(
     disabled=False
 )
 w_startdate1 = widgets.Text(
-    value='2019-06-01',
+    value='2025-06-01',
     placeholder=' ',
     description='Start T1:',
     disabled=False
 )
 w_enddate1 = widgets.Text(
-    value='2019-06-30',
+    value='2025-06-21',
     placeholder=' ',
     description='End T1:',
     disabled=False
 )
 w_startdate2 = widgets.Text(
-    value='2020-06-01',
+    value='2025-06-22',
     placeholder=' ',
     description='Start T2:',
     disabled=False
 )
 w_enddate2 = widgets.Text(
-    value='2020-06-30',
+    value='2025-06-30',
     placeholder=' ',
     description='End T2:',
     disabled=False
@@ -249,15 +250,19 @@ def on_collect_button_clicked(b):
             clear_layers()
             print('Collecting ...')
             if w_platform.value=='SENTINEL/S2(VNIR)':
-                collectionid = 'COPERNICUS/S2_SR'
+                collectionid = 'COPERNICUS/S2_HARMONIZED'
                 bands = ['B2','B3','B4','B8']
                 rgb = ['B4','B3','B2']
                 cloudcover = 'CLOUDY_PIXEL_PERCENTAGE'
+                spacecraft_name = 'SPACECRAFT_NAME'
+                sensing_orbit_number = 'SENSING_ORBIT_NUMBER'
             elif w_platform.value=='SENTINEL/S2(NIR/SWIR)':
-                collectionid = 'COPERNICUS/S2_SR'
+                collectionid = 'COPERNICUS/S2_HARMONIZED'
                 bands = ['B5','B6','B7','B8A','B11','B12']
                 rgb = ['B5','B7','B11']
                 cloudcover = 'CLOUDY_PIXEL_PERCENTAGE'
+                spacecraft_name = 'SPACECRAFT_NAME'
+                sensing_orbit_number = 'SENSING_ORBIT_NUMBER'
             elif w_platform.value=='LANDSAT LC08':
                 collectionid = 'LANDSAT/LC08/C02/T1_L2'
                 bands = ['SR_B2','SR_B3','SR_B4','SR_B5','SR_B6','SR_B7']
@@ -299,8 +304,16 @@ def on_collect_button_clicked(b):
             cloudcover2 = image2.get(cloudcover).getInfo()
             print('Img1: %s'%systemid1)
             print('Date: %s, Cloud cover(percent): %f'%(timestamp1,cloudcover1))
+            if w_platform.value == 'SENTINEL/S2(VNIR)' or w_platform.value == 'SENTINEL/S2(NIR/SWIR)':
+                spacecraft_name1 = image1.get(spacecraft_name).getInfo()
+                sensing_orbit_number1 = image1.get(sensing_orbit_number).getInfo()
+                print('Name: %s, Orbit: %f'%(spacecraft_name1,sensing_orbit_number1))
             print('Img2: %s'%systemid2)
             print('Date: %s, Cloud cover(percent): %f'%(timestamp2,cloudcover2))
+            if w_platform.value == 'SENTINEL/S2(VNIR)' or w_platform.value == 'SENTINEL/S2(NIR/SWIR)':
+                spacecraft_name2 = image2.get(spacecraft_name).getInfo()
+                sensing_orbit_number2 = image2.get(sensing_orbit_number).getInfo()
+                print('Name: %s, Orbit: %f' % (spacecraft_name2, sensing_orbit_number2))
             nbands = image1.bandNames().length()
             madnames = ['MAD'+str(i+1) for i in range(nbands.getInfo())]
 
@@ -371,7 +384,11 @@ def on_preview_button_clicked(b):
             plt.show()
             #display
             #m.add(TileLayer(url=GetTileLayerUrl(chi2.visualize(min=1000,max=10000)),name='chi square'))
-            m.add(TileLayer(url=GetTileLayerUrl(rgblayer(MAD,[0,1,2],symmetric=True)),name='MAD123'))
+            mads = rgblayer(MAD,[0,1,2],symmetric=True)
+            m.add(TileLayer(url=GetTileLayerUrl(mads.select([0,1,2])), name='MADRGB'))
+            m.add(TileLayer(url=GetTileLayerUrl(mads.select(0)), name='MAD1'))
+            m.add(TileLayer(url=GetTileLayerUrl(mads.select(1)), name='MAD2'))
+            m.add(TileLayer(url=GetTileLayerUrl(mads.select(2)), name='MAD3'))
         except Exception as e:
             print('Error: %s'%e)
 
@@ -584,9 +601,10 @@ def run():
     lc = LayersControl(position='topright')
     fs = FullScreenControl(position='topleft')
     mc = MeasureControl(position='topright',primary_length_unit='kilometers')
-    m = Map(center=center, zoom=11, layout={'height':'500px'},layers=(ewi,ews,osm),controls=(mc,dc,lc,fs))
+    m = Map(center=center, zoom=11, layout={'height':'600px'},layers=(ewi,ews,osm),controls=(mc,dc,lc,fs))
     with w_out:
         w_out.clear_output()
         print('Set/erase one or more polygons\nAlgorithm output:')
     display(m)
+
     return box
