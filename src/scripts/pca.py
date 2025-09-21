@@ -3,7 +3,7 @@
 #  Name:     pca.py
 #  Purpose:  Principal components analysis
 #  Usage (from command line):
-#    python pca.py  [options] fileNmae
+#    python pca.py  [options] fileName
 #
 #  Copyright (c) 2018 Mort Canty
 
