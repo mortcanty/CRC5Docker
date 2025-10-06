@@ -461,7 +461,7 @@ def assemble_and_run(aoi, median = True, significance = 0.01, stride = 1, startd
     
     try:
         collection = getS1collection(aoi, orbitpass, startdate, enddate)   
-        if platform != 'Both':
+        if platform != 'All':
             collection = collection.filter(ee.Filter.eq('platform_number', platform))
         if ron > 0:
             collection = collection.filter(ee.Filter.eq('relativeOrbitNumber_start', int(ron)))

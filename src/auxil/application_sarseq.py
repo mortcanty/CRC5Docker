@@ -91,8 +91,8 @@ w_minfreq = widgets.BoundedIntText(
 )
 w_platform = widgets.RadioButtons(
     layout = widgets.Layout(width='200px'),
-    options=['Both','A','B'],
-     value='A',
+    options=['All','A','B','C'],
+    value='A',
     description='Platform:',
     disabled=False
 )
