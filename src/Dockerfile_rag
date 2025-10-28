@@ -61,7 +61,7 @@ COPY    Chapter?.ipynb /home/
 
 WORKDIR /home
 
-ENV     REFRESHED_AT=2025-03-02
+ENV     REFRESHED_AT=2025-10-29
 
 # ----Experimental RAG/LLM for textbook-------
 RUN    curl -fsSL https://ollama.com/install.sh | sh
