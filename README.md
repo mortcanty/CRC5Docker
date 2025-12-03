@@ -38,13 +38,13 @@ https://earthengine.google.com/
 For LLM enthusiasts an experimental RAG (retrieval augmented generation) 
 version of the Docker container can be pulled and run with
 
-    docker run -d -p 8888:8888 -p 7860-7869:7860-7869 
-        -v <path-to-crc5imagery>:/home/imagery/ --name=crc5_rag
-            mort/crc5docker_rag
+    docker run -d -p 8888:8888 -p 7860-7869:7860-7869 -v <path-to-crc5imagery>:/home/imagery/ --name=crc5_rag mort/crc5docker_rag
 
-which includes an additional JupyterLab notebook to query the textbook's content informally. Since the LLM is running locally on a CPU, the response time is very slow (minutes). 
-While the model usually does its best, the retrieved content is limited by the LLM prompt window so the generated answers are often misleading.
-If you use the cloud version (see the RAG Notebook), response time is in seconds and the answers are much more reliable and pertinent. 
+which includes an additional JupyterLab notebook to query the textbook's content informally. 
+If the LLM is running locally on a CPU, the response time is very slow (minutes). 
+and the generated answers are often misleading. If you use a cloud version (see the RAG Notebook), 
+response time is in seconds and the answers are much more reliable and pertinent. A (free) ollama 
+account is required.
 
 __Book Summary__
 
