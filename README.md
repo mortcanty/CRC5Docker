@@ -50,6 +50,10 @@ __Book Summary__
 
     chapter_abstracts.pdf
 
+__Errata__
+
+    errata5.pdf
+
 __Additional Earth Engine Tutorials__
 
 https://developers.google.com/earth-engine/tutorials/community/imad-tutorial-pt1
