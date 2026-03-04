@@ -46,6 +46,11 @@ and the generated answers are often misleading. If you use a cloud version (see 
 response time is in seconds and the answers are much more reliable and pertinent. A (free) ollama 
 account is required.
 
+A compact monograph (about 60 pages) covering the theory of sequential change detection with
+Sentinel-1 SAR imagery archived on GEE is included in
+    
+        gee-s1-pdf
+
 __Book Summary__
 
     chapter_abstracts.pdf
