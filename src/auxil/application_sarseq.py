@@ -63,7 +63,7 @@ w_changemap = widgets.RadioButtons(
     disabled=False
 )
 w_visual = widgets.RadioButtons(
-    options=['S2', 'NAIP'],
+    options=['S2', 'NAIP', 'EMBED'],
     value='S2',
     layout = widgets.Layout(width='200px'),
     disabled=False
@@ -130,14 +130,14 @@ w_exportscale = widgets.FloatText(
 )
 w_startdate = widgets.Text(
     layout = widgets.Layout(width='200px'),
-    value='2024-08-01',
+    value='2024-01-01',
     placeholder=' ',
     description='StartDate:',
     disabled=False
 )
 w_enddate = widgets.Text(
     layout = widgets.Layout(width='200px'),
-    value='2024-12-31',
+    value='2025-01-01',
     placeholder=' ',
     description='EndDate:',
     disabled=False
@@ -632,6 +632,31 @@ def collect_naip():
             print('Error: %s' % e)
     return(image_naip)
 
+def collect_embed():
+    with w_out:
+        w_out.clear_output()
+        try:
+            collectionid = 'GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL'
+            # current time interval
+            image2 = ee.ImageCollection(collectionid) \
+                .filterBounds(aoi) \
+                .filterDate(ee.Date(w_startdate.value), ee.Date(w_enddate.value)) \
+                .first() \
+                .clip(aoi)
+            # one year earlier
+            t1 = str(int(w_startdate.value[0:4]) - 1)
+            t2 = str(int(w_enddate.value[0:4]) - 1)
+            print('Embedding change detection from years %s and %s ...' % (t1, t2))
+            image1 = ee.ImageCollection(collectionid) \
+                .filterBounds(aoi) \
+                .filterDate(ee.Date(t1), ee.Date(t2)) \
+                .first() \
+                .clip(aoi)
+            dotprod = image1.multiply(image2).reduce(ee.Reducer.sum())
+        except Exception as e:
+            print('Error: %s' % e)
+    return(dotprod)
+
 def on_view_button_clicked(b):
     ''' View optical imagery '''
     with w_out:
@@ -657,17 +682,24 @@ def on_view_button_clicked(b):
                 mn = [0, 0, 0]
                 mx = [255, 255, 255]
                 palette = None
-            if w_dw.value:
-                mp = maskNoBuildings(mp)
-            if w_maskwater.value==True:
-                mp = mp.updateMask(watermask)
-            if w_maskchange.value==True:
-                if w_changemap.value=='Frequency':
-                    mp = mp.updateMask(mp.gte(w_minfreq.value))
-                elif w_changemap.value=='ATSF':
-                    pass
-                else:
-                    mp = mp.updateMask(mp.gt(0))
+            elif w_visual.value=='EMBED':
+                w_out.clear_output()
+                image_embed = collect_embed()
+                mp = ee.Image(image_embed)
+                mn = [0]
+                mx = [1]
+                palette = ['white', 'black']
+            #if w_dw.value:
+            #    mp = maskNoBuildings(mp)
+            #if w_maskwater.value==True:
+            #    mp = mp.updateMask(watermask)
+            #if w_maskchange.value==True:
+            #    if w_changemap.value=='Frequency':
+            #        mp = mp.updateMask(mp.gte(w_minfreq.value))
+            #    elif w_changemap.value=='ATSF':
+            #        pass
+            #    else:
+            #        mp = mp.updateMask(mp.gt(0))
             m.add(TileLayer(url=GetTileLayerUrl(mp.visualize(min=mn, max=mx,
                                   palette=palette)), name=w_visual.value))
         except Exception as e:
