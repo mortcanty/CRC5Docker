@@ -44,7 +44,7 @@ groundTruth = ground_truth.reduceToImage(["diff"], ee.Reducer.first())
 
 w_location = widgets.Text(
     layout = widgets.Layout(width='150px'),
-    value='Odessa',
+    value='Hormuz',
     placeholder=' ',
     description='',
     disabled=False
@@ -130,21 +130,21 @@ w_exportscale = widgets.FloatText(
 )
 w_startdate = widgets.Text(
     layout = widgets.Layout(width='200px'),
-    value='2024-01-01',
+    value='2025-08-01',
     placeholder=' ',
     description='StartDate:',
     disabled=False
 )
 w_enddate = widgets.Text(
     layout = widgets.Layout(width='200px'),
-    value='2025-01-01',
+    value='2026-12-31',
     placeholder=' ',
     description='EndDate:',
     disabled=False
 )
 w_median = widgets.Checkbox(
     layout = widgets.Layout(width='200px'),
-    value=False,
+    value=True,
     description='MedianFilter',
     disabled=False
 )
@@ -155,8 +155,8 @@ w_quick = widgets.Checkbox(
 )
 w_significance = widgets.BoundedFloatText(
     layout = widgets.Layout(width='200px'),
-    value='0.01',
-    min=0.0001,
+    value='0.001',
+    min=0.000001,
     max=0.05,
     step=0.001,
     description='Signif:',
@@ -168,7 +168,7 @@ w_maskchange = widgets.Checkbox(
     disabled=False
 )
 w_maskwater = widgets.Checkbox(
-    value=True,
+    value=False,
     description='WaterMask',
     disabled=False
 )
@@ -247,7 +247,7 @@ w_changemap.observe(on_changemap_widget_change,names='value')
 def clear_layers():
     for i in range(20,2,-1): 
         if len(m.layers)>i:
-            m.remove_layer(m.layers[i])    
+            m.remove(m.layers[i])
 
 def on_reset_button_clicked(b):
     try:
@@ -330,11 +330,11 @@ def plot_bmap(image):
             # leave out first three changes in plot (anlauf Zeit?)
             plt.ylim(bottom=0.0,top=max(alldef)*1.1)
             if w_plot_type.value == 'Direction':
-                plt.plot(x[3:-1], posdef[3:-1], 'ro-', label='posdef')
-                plt.plot(x[3:-1], negdef[3:-1], 'co-', label='negdef')
-                plt.plot(x[3:-1], indef[3:-1], 'yo-', label='indef')
+                plt.plot(x[3:], posdef[3:], 'ro-', label='posdef')
+                plt.plot(x[3:], negdef[3:], 'co-', label='negdef')
+                plt.plot(x[3:], indef[3:], 'yo-', label='indef')
             else:
-                plt.plot(x[3:-1], alldef[3:-1], 'bo-', label='all')
+                plt.plot(x[3:], alldef[3:], 'bo-', label='all')
             ticks = range(0, k+2)
             labels = [str(i) for i in range(0, k+2)]
             labels[0] = ' '
