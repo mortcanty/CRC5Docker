@@ -7,7 +7,7 @@ FROM     ubuntu:22.04
 
 LABEL  "maintainer"="mort.canty@gmail.com"
 
-ENV     REFRESHED_AT=2025-10-07
+ENV     REFRESHED_AT=2026-05-12
 
 # last 3 installs are required for opencv
 RUN apt-get update && apt-get install -y \

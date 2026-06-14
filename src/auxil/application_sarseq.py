@@ -330,11 +330,11 @@ def plot_bmap(image):
             # leave out first three changes in plot (anlauf Zeit?)
             plt.ylim(bottom=0.0,top=max(alldef)*1.1)
             if w_plot_type.value == 'Direction':
-                plt.plot(x[3:], posdef[3:], 'ro-', label='posdef')
-                plt.plot(x[3:], negdef[3:], 'co-', label='negdef')
-                plt.plot(x[3:], indef[3:], 'yo-', label='indef')
+                plt.plot(x[3:-1], posdef[4:], 'ro-', label='posdef')
+                plt.plot(x[3:-1], negdef[4:], 'co-', label='negdef')
+                plt.plot(x[3:-1], indef[4:], 'yo-', label='indef')
             else:
-                plt.plot(x[3:], alldef[3:], 'bo-', label='all')
+                plt.plot(x[3:-1], alldef[4:], 'bo-', label='all')
             ticks = range(0, k+2)
             labels = [str(i) for i in range(0, k+2)]
             labels[0] = ' '

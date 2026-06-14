@@ -38,7 +38,7 @@ Options:
     sfn = None
     for option, value in options:
         if option == '-h':
-            print usage
+            print(usage)
             return        
         elif option == '-d':
             dims = eval(value) 
@@ -57,8 +57,8 @@ Options:
         b1 = eval(args[1])
         b2 = eval(args[2])
     else:
-        print 'Incorrect number of arguments'
-        print usage
+        print('Incorrect number of arguments')
+        print(usage)
         sys.exit(1)             
     gdal.AllRegister()
     inDataset = gdal.Open(fn1,GA_ReadOnly)  
